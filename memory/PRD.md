@@ -61,6 +61,13 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 - Konten trending November 2026: pajak transaksi online 0,5%, klarifikasi Menkeu soal 9 November, reshuffle Kemenkeu (Purbaya → Suahasil).
 - Preview cuitan X: karena iframe platform.twitter.com/embed tidak merender di preview environment (blank), konten X kini menampilkan thumbnail kaya dengan overlay branding X (handle, judul, tanggal, statistik) — bukan iframe rusak. Instagram/TikTok tetap memakai embed iframe resmi.
 
+## Implemented (2026-11-06, ronde 11)
+- Konten trending bad news politics: 10 item per kanal untuk Gerald Vincent (TikTok), Fahri Hamzah (X), Partai Socmed (X), Tempo (X) — total 40 konten trending November 2026 (pajak online 0,5%, reshuffle Kemenkeu, efisiensi anggaran, MBG, IKN, dinasti politik, Timah, RUU Pilkada, dll).
+- Thumbnail diperbaiki: semua memakai URL stabil Unsplash/Pexels; TikTok menampilkan embed video asli, X menampilkan preview thumbnail kaya dengan branding.
+
+## Verified (ronde 11) — oleh troubleshoot_agent
+- TikTok: Gerald Vincent dengan 10 konten + embed video berfungsi. X: Fahri Hamzah, Partai Socmed, Tempo masing-masing 10 konten dengan preview thumbnail benar. Semua thumbnail termuat, konten trending November 2026 tersedia.
+
 ## Verified (ronde 10) — oleh troubleshoot_agent
 - Instagram embed berfungsi untuk URL /p/…; TikTok embed berfungsi untuk URL /video/…; X menampilkan preview kaya dengan benar; semua identitas kanal benar; konten trending November 2026 tersedia.
 
