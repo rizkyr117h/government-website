@@ -39,6 +39,75 @@ function TypeBadge({ type }) {
   );
 }
 
+// Ambil URL embed iframe resmi dari URL konten (Instagram /p/…, TikTok …/video/…)
+function embedUrl(url) {
+  if (!url) return null;
+  const ig = url.match(/instagram\.com\/(p|reel|reels)\/([\w-]+)/);
+  if (ig) return `https://www.instagram.com/${ig[1]}/${ig[2]}/embed/`;
+  const tt = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
+  if (tt) return `https://www.tiktok.com/player/v1/${tt[1]}`;
+  return null;
+}
+
+function FeaturedPreview({ item, channel }) {
+  const embed = embedUrl(item.url);
+  const [embedFailed, setEmbedFailed] = useState(false);
+
+  if (embed && !embedFailed) {
+    return (
+      <div className="relative mx-5 overflow-hidden border border-slate-200 bg-slate-100" data-testid={`channel-preview-${channel.id}`}>
+        <div className="aspect-[4/5] w-full sm:aspect-[16/10]">
+          <iframe
+            src={embed}
+            title={item.title}
+            className="h-full w-full"
+            frameBorder="0"
+            scrolling="no"
+            allow="encrypted-media; picture-in-picture"
+            onError={() => setEmbedFailed(true)}
+          />
+        </div>
+        <a
+          href={item.url || channel.url || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0"
+          aria-label={`Buka konten ${item.title}`}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href={item.url || channel.url || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group/preview relative mx-5 block overflow-hidden border border-slate-200"
+      data-testid={`channel-preview-${channel.id}`}
+    >
+      {item.image_url && (
+        <img
+          src={item.image_url}
+          alt={item.title}
+          loading="lazy"
+          className="aspect-[16/8] w-full object-cover transition-transform duration-500 group-hover/preview:scale-105"
+        />
+      )}
+      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent p-4">
+        <span className="mb-2 w-fit"><TypeBadge type={item.type} /></span>
+        <p className="font-serif text-base font-bold leading-snug text-white">{item.title}</p>
+        <p className="mt-1 text-[10px] font-mono uppercase tracking-wider text-slate-300">
+          {item.date} · {item.stats}
+        </p>
+      </div>
+      <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center border border-white/40 bg-slate-950/50 text-white backdrop-blur-sm transition-colors group-hover/preview:bg-red-700">
+        <Play size={14} fill="currentColor" />
+      </span>
+    </a>
+  );
+}
+
 export default function SocialChannels({ channels }) {
   const [platform, setPlatform] = useState("Semua");
   const filtered = channels.filter((c) => platform === "Semua" || c.platform === platform);
@@ -104,34 +173,7 @@ export default function SocialChannels({ channels }) {
                 </div>
 
                 {/* preview konten utama */}
-                {featured && (
-                  <a
-                    href={featured.url || c.url || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group/preview relative mx-5 block overflow-hidden border border-slate-200"
-                    data-testid={`channel-preview-${c.id}`}
-                  >
-                    {featured.image_url && (
-                      <img
-                        src={featured.image_url}
-                        alt={featured.title}
-                        loading="lazy"
-                        className="aspect-[16/8] w-full object-cover transition-transform duration-500 group-hover/preview:scale-105"
-                      />
-                    )}
-                    <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent p-4">
-                      <span className="mb-2 w-fit"><TypeBadge type={featured.type} /></span>
-                      <p className="font-serif text-base font-bold leading-snug text-white">{featured.title}</p>
-                      <p className="mt-1 text-[10px] font-mono uppercase tracking-wider text-slate-300">
-                        {featured.date} · {featured.stats}
-                      </p>
-                    </div>
-                    <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center border border-white/40 bg-slate-950/50 text-white backdrop-blur-sm transition-colors group-hover/preview:bg-red-700">
-                      <Play size={14} fill="currentColor" />
-                    </span>
-                  </a>
-                )}
+                {featured && <FeaturedPreview item={featured} channel={c} />}
 
                 {/* daftar konten */}
                 <div className="flex-1 p-5 pt-4">

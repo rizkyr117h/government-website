@@ -53,6 +53,12 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 - Konten pajak transaksi online 0,5% (PMK-37/2025, mulai 1 Nov 2026): ditambahkan ke Tirta (Instagram, tautan instagram.com/p/DfL8N6hyiwD/), Fadil Jaidi (TikTok, tautan tiktok.com/@geraldvincentt/video/7703064497396780306), Fahri Hamzah (X), dan Eko Kuntadhi (Facebook).
 - Kanal X baru "Partai Socmed" (@partaisocmed) dengan 2 konten pajak online & Danantara.
 
+## Implemented (2026-11-06, ronde 9)
+- Preview konten asli Instagram & TikTok: konten yang URL-nya mengarah ke post/reel/video spesifik kini dirender sebagai embed iframe resmi (instagram.com/.../embed/ dan tiktok.com/player/v1/...), menampilkan thumbnail asli, judul, play button, like/comment count, dan durasi — bukan lagi gambar stock. Konten non-embeddable tetap fallback ke thumbnail gambar.
+
+## Verified (ronde 9) — oleh troubleshoot_agent
+- Embed URL Instagram/TikTok valid (HTTP 200), FeaturedPreview merender iframe dengan fallback benar, konten "Pajak Transaksi Online" tampil sebagai preview video asli.
+
 ## Verified (ronde 8)
 - Screenshots: filter Instagram (konten pajak baru tampil sebagai preview utama Tirta), TikTok (konten pajak baru tampil), X (Partai Socmed tampil sebagai kanal baru).
 
