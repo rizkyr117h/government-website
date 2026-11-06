@@ -49,6 +49,13 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 ## Implemented (2026-11-06, ronde 7)
 - Fix thumbnail view: mengganti semua URL CDN Instagram/Facebook/TikTok yang kedaluwarsa/diblokir hotlink dengan URL stabil Unsplash/Pexels; YouTube tetap memakai img.youtube.com/vi/<id>/hqdefault.jpg (resmi & stabil).
 
+## Implemented (2026-11-06, ronde 8)
+- Konten pajak transaksi online 0,5% (PMK-37/2025, mulai 1 Nov 2026): ditambahkan ke Tirta (Instagram, tautan instagram.com/p/DfL8N6hyiwD/), Fadil Jaidi (TikTok, tautan tiktok.com/@geraldvincentt/video/7703064497396780306), Fahri Hamzah (X), dan Eko Kuntadhi (Facebook).
+- Kanal X baru "Partai Socmed" (@partaisocmed) dengan 2 konten pajak online & Danantara.
+
+## Verified (ronde 8)
+- Screenshots: filter Instagram (konten pajak baru tampil sebagai preview utama Tirta), TikTok (konten pajak baru tampil), X (Partai Socmed tampil sebagai kanal baru).
+
 ## Verified (ronde 7) — oleh troubleshoot_agent
 - Semua filter platform (Semua, Instagram, YouTube, Facebook, TikTok) menampilkan thumbnail dengan benar; 0 URL CDN sosial yang bermasalah tersisa.
 
