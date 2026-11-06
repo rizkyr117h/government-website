@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { LogoMark } from "@/components/Header";
 import { api, formatDate, formatApiErrorDetail } from "@/lib/api";
 
-const CATEGORIES = ["Korupsi", "Skandal", "Kontroversi", "Kebijakan", "Pemilu"];
+const CATEGORIES = ["Korupsi", "Skandal", "Kontroversi", "Kebijakan", "Pemilu", "Media Sosial"];
 const SEVERITIES = ["Kritis", "Tinggi", "Sedang"];
 
 const EMPTY_ARTICLE = {

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Search, Clock } from "lucide-react";
 import { formatDate } from "@/lib/api";
 
-const CATEGORIES = ["Semua", "Korupsi", "Skandal", "Kontroversi", "Kebijakan", "Pemilu"];
+const CATEGORIES = ["Semua", "Korupsi", "Skandal", "Kontroversi", "Kebijakan", "Pemilu", "Media Sosial"];
 
 const SEVERITY_STYLE = {
   Kritis: "bg-red-700 text-white",
@@ -54,7 +54,7 @@ export default function ArticleFeed({ articles }) {
           <button
             key={c}
             onClick={() => setCategory(c)}
-            data-testid={`filter-${c.toLowerCase()}`}
+            data-testid={`filter-${c.toLowerCase().replace(/\s+/g, "-")}`}
             className={`border px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
               category === c
                 ? "border-slate-900 bg-slate-900 text-white"

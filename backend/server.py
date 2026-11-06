@@ -315,6 +315,14 @@ async def list_rankings():
     return await db.rankings.find({}, {"_id": 0}).to_list(100)
 
 
+@api_router.get("/rankings/{key}")
+async def get_ranking(key: str):
+    ranking = await db.rankings.find_one({"key": key}, {"_id": 0})
+    if not ranking:
+        raise HTTPException(status_code=404, detail="Indeks tidak ditemukan")
+    return ranking
+
+
 class RankingInput(BaseModel):
     value: str
     rank: int
@@ -418,6 +426,83 @@ SEED_ARTICLES = [
         "loss_estimate": "Rp 466 T (estimasi total)",
         "reading_time": 6,
     },
+    {
+        "title": "Kabinet Gemuk ala Prabowo: 100+ Kursi Menteri dan Wakil Menteri, Rekor Terbesar Era Reformasi",
+        "category": "Kebijakan",
+        "severity": "Tinggi",
+        "dek": "Presiden Prabowo Subianto membentuk kabinet terbesar sejak reformasi dengan lebih dari seratus menteri, wakil menteri, dan pejabat setingkat. Kritikus menyebutnya politik akomodasi yang membebani APBN.",
+        "body": "Kabinet Merah Putih mencetak rekor: 48 kementerian dengan total lebih dari 100 menteri, wakil menteri, dan pejabat setingkat menteri. Jumlah ini melampaui kabinet era Jokowi maupun pemerintahan sebelumnya, bahkan mendekati praktik era Orde Baru.\n\nPara pengamat menilai gemuknya kabinet bukan soal kebutuhan teknis, melainkan akomodasi politik. Koalisi superbesar yang dibangun membuat hampir semua partai pendukung menuntut jatah kursi. Akibatnya, fungsi kementerian tumpang tindih dan koordinasi justru makin rumit.\n\nIronisnya, di saat yang sama pemerintah menggemakan efisiensi anggaran. Biaya gaji, tunjangan, dan rumah dinas untuk seratus lebih pejabat itu membebani APBN ratusan miliar rupiah per tahun — uang yang bisa dialihkan untuk sekolah atau puskesmas.",
+        "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "author": "Dewi Kartika",
+        "loss_estimate": None,
+        "reading_time": 6,
+    },
+    {
+        "title": "Efisiensi Anggaran Rp 306 Triliun: Pemangkasan Masal dan Layanan Publik yang Tersendat",
+        "category": "Kebijakan",
+        "severity": "Kritis",
+        "dek": "Instruksi presiden memangkas belanja kementerian dan lembaga ratusan triliun rupiah. Honorarium ditahan, perjalanan dinas dibekukan, ribuan pegawai kontrak dirumahkan.",
+        "body": "Lewat instruksi efisiensi anggaran, pemerintahan Prabowo memangkas belanja kementerian dan lembaga hingga lebih dari Rp 300 triliun. Sebagian dialihkan untuk membiayai program prioritas seperti makan bergizi gratis.\n\nDampaknya langsung terasa di akar rumput: ribuan pegawai honorer dan kontrak di berbagai daerah dirumahkan, dana penelitian kampus menyusut, beasiswa terancam, hingga biaya operasional layanan publik dipangkas habis. Di sejumlah kementerian, lampu gedung dimatikan bergantian dan pencetakan dokumen dibatasi.\n\nEkonom mengingatkan bahwa pemangkasan masal tanpa peta jalan yang jelas justru menekan daya beli masyarakat dan memperlambat ekonomi. Yang paling dikritik: minimnya transparansi soal pos apa saja yang dipangkas dan ke mana uangnya benar-benar bermuara.",
+        "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "author": "Fajar Nugraha",
+        "loss_estimate": "Rp 306 T (dipangkas)",
+        "reading_time": 6,
+    },
+    {
+        "title": "Makan Bergizi Gratis di Bawah Sorotan: Anggaran Fantastis dan Gelombang Keracunan Massal",
+        "category": "Skandal",
+        "severity": "Kritis",
+        "dek": "Program andalan Prabowo senilai ratusan triliun rupiah per tahun menyasar puluhan juta anak. Alih-alih menjadi lompatan gizi, program ini diwarnai ribuan kasus keracunan dan dapur tak layak.",
+        "body": "Makan Bergizi Gratis diiklankan sebagai warisan terbesar pemerintahan Prabowo: makan siang gratis untuk puluhan juta anak sekolah dan ibu hamil, dengan anggaran yang diperkirakan menembus Rp 171 triliun per tahun saat berjalan penuh.\n\nNamun implementasinya terseok-seok. Laporan keracunan massal berdatangan dari berbagai daerah — ribuan anak muntah dan dilarikan ke puskesmas setelah menyantap paket makanan. Pemeriksaan menemukan dapur-dapur satuan layanan yang tak memenuhi standar higienitas.\n\nKritikus juga menyoroti mekanisme kontrak dan yayasan penyelenggara yang dinilai rawan konflik kepentingan. Dengan dana sebesar itu mengalir lewat skema yang belum matang, program ini berisiko menjadi lahan subur penyelewengan baru — bila pengawasan tak diperketat.",
+        "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "author": "Rani Amelia",
+        "loss_estimate": "Rp 171 T (anggaran/tahun)",
+        "reading_time": 6,
+    },
+    {
+        "title": "Danantara: 'Superholding' Triliunan Rupiah yang Bergerak di Luar Jangkauan Pengawasan",
+        "category": "Kontroversi",
+        "severity": "Tinggi",
+        "dek": "Badan pengelola aset BUMN dengan nilai diklaim hampir Rp 15.000 triliun kini menguasai dividen dan arah kebijakan perusahaan negara. UU baru mengecualikannya dari definisi keuangan negara.",
+        "body": "Daya Aneka Nusantara Investment Agency — Danantara — didapuk menjadi superholding yang mengelola saham pemerintah di puluhan BUMN, dari bank pelat merah hingga PLN. Nilai aset yang dikelolanya diklaim setara ratusan miliar dolar AS.\n\nMasalahnya, perubahan UU BUMN membuat aset Danantara tak lagi dianggap keuangan negara. Artinya, ruang pemeriksaan oleh BPK menyempit dan penanganan potensi penyimpangan menjadi abu-abu secara hukum. Struktur penasihatnya pun diisi lingkaran dekat presiden.\n\nPengamat membandingkannya dengan dana kekayaan negara lain di dunia yang diawasi ketat parlemen. Di Indonesia, publik hanya bisa berharap pada itikad baik — sementara triliunan rupiah dividen rakyat berpindah ke tangan segelintir orang.",
+        "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "author": "Bagas Prakoso",
+        "loss_estimate": None,
+        "reading_time": 6,
+    },
+    {
+        "title": "'Indonesia Gelap': Ketika Tagar Media Sosial Lebih Didengar daripada Ruang Rapat DPR",
+        "category": "Media Sosial",
+        "severity": "Tinggi",
+        "dek": "Gerakan mahasiswa dan warganet dengan tagar #IndonesiaGelap menggema lintas platform. Demonstrasi fisik diiringi jutaan unggahan — tanda membesarnya kekecewaan yang dikelola lewat layar.",
+        "body": "Berawal dari unggahan mahasiswa, tagar #IndonesiaGelap menjalar ke seluruh platform: gambar logo Garuda yang digelapkan, keluhan soal efisiensi anggaran, PHK, dan beasiswa yang menyusut. Dalam hitungan hari, tagar itu dipakai jutaan kali.\n\nAksi turun ke jalan menyusul di berbagai kota. Menariknya, organisasi gerakan kali ini nyaris tanpa komando pusat — semuanya diorkestrasi lewat grup chat, infografis viral, dan video pendek. Pemerintah merespons dengan bantahan yang justru menjadi bahan bakar gelombang berikutnya.\n\nFenomena ini menegaskan pergeseran besar: arena perjuangan politik kini berada di media sosial. Ruang rapat DPR yang tertutup kalah cepat oleh kecepatan unggahan, dan partai-partai tampak belum paham cara membacanya.",
+        "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "author": "Tim Redaksi",
+        "loss_estimate": None,
+        "reading_time": 5,
+    },
+    {
+        "title": "Rombongan Influencer di Istana: Ketika Negara Dirangkul Lewat Konten",
+        "category": "Media Sosial",
+        "severity": "Sedang",
+        "dek": "Kreator konten dan influencer diajak mendampingi acara resmi kenegaraan hingga tur ke luar negeri. Apresiasi terhadap karya anak bangsa, atau mesin pembentuk opini baru?",
+        "body": "Pemandangan baru di lingkungan istana: deretan influencer dan YouTuber berjajar di acara resmi, membuat vlog dari sudut-sudut yang biasanya hanya diakses jurnalis terakreditasi. Pemerintah menyebutnya upaya mendekatkan negara dengan anak muda.\n\nNamun pertanyaan etis mengemuka. Ketika kreator yang diundang mendapatkan akses istimewa, apakah konten yang dihasilkan masih independen? Sejumlah kreator mengaku tak dibayar, namun akses itu sendiri adalah kompensasi yang tak ternilai harganya.\n\nPengamat komunikasi menyebut ini evolusi politik pencitraan: dari iklan televisi ke konten genggaman. Publik tak lagi membedakan mana liputan, mana endorsement — dan di situlah letak bahayanya.",
+        "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "author": "Rani Amelia",
+        "loss_estimate": None,
+        "reading_time": 4,
+    },
+    {
+        "title": "Ekonomi Buzzer: Industri Komentar Bayaran yang Menyusupi Percakapan Publik",
+        "category": "Media Sosial",
+        "severity": "Tinggi",
+        "dek": "Dari trending topik pesanan hingga pasukan komentar: ekonomi perbuzzeran diperkirakan bernilai miliaran rupiah per musim kampanye. Siapa yang membayar, dan untuk agenda siapa?",
+        "body": "Berbagai riset akademik mencatat praktik pasukan buzzer menjadi bisnis yang matang: ada broker, ada daftar tarif per unggahan, per komentar, hingga per trending topik. Pada musim pemilu, nilai perputarannya ditaksir mencapai miliaran rupiah.\n\nDampaknya bukan sekadar kebisingan. Percakapan publik yang seharusnya organik berubah menjadi panggung sandiwara: isu dimainkan, tokoh diserang, opini digiring. Warganet awam sering tak sadar bahwa 'keramaian' di linimasanya adalah produk pesanan.\n\nRegulasi belum mampu mengejar. Platform media sosial berdalih netralitas, sementara undang-undang tak mengatur secara spesifik. Selama permintaan dari aktor politik terus ada, industri bayangan ini akan terus tumbuh subur.",
+        "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "author": "Bagas Prakoso",
+        "loss_estimate": None,
+        "reading_time": 5,
+    },
 ]
 
 SEED_SCANDALS = [
@@ -430,13 +515,135 @@ SEED_SCANDALS = [
 ]
 
 SEED_RANKINGS = [
-    {"key": "cpi", "label": "Indeks Persepsi Korupsi", "value": "34/100", "rank": 115, "total": 180, "pct": 19, "trend": "stagnan", "source": "Transparency International, CPI 2024", "note": "Skor stagnan satu dekade; dua pertiga negara dunia mencetak di bawah 50."},
-    {"key": "press", "label": "Kebebasan Pers", "value": "Peringkat 111", "rank": 111, "total": 180, "pct": 38, "trend": "turun", "source": "Reporters Without Borders, 2025", "note": "Kekerasan terhadap jurnalis dan kriminalisasi UU ITE jadi catatan merah."},
-    {"key": "iq", "label": "IQ Rata-Rata", "value": "78,5", "rank": 130, "total": 199, "pct": 35, "trend": "stagnan", "source": "World Population Review (diperdebatkan)", "note": "Metodologi diperdebatkan para ahli, namun angkanya kerap dikutip publik."},
-    {"key": "education", "label": "Indeks Pendidikan (HDI)", "value": "0,728", "rank": 113, "total": 193, "pct": 41, "trend": "naik", "source": "UNDP, Laporan HDI 2025", "note": "Rata-rata lama sekolah masih di bawah 13 tahun."},
-    {"key": "health", "label": "Keamanan Kesehatan Global", "value": "50,4/100", "rank": 30, "total": 195, "pct": 15, "trend": "naik", "source": "Global Health Security Index 2021", "note": "Pandemi mengekspos kesenjangan fasilitas kesehatan antardaerah."},
-    {"key": "gdp", "label": "PDB Nominal", "value": "US$ 1,4 T", "rank": 16, "total": 190, "pct": 8, "trend": "naik", "source": "IMF, World Economic Outlook 2025", "note": "Ekonomi terbesar ASEAN, namun PDB per kapita hanya peringkat 117."},
-    {"key": "democracy", "label": "Indeks Demokrasi", "value": "6,44/10", "rank": 54, "total": 167, "pct": 32, "trend": "turun", "source": "The Economist Intelligence Unit, 2024", "note": "Status 'demokrasi cacat' bertahan sejak 2017."},
+    {
+        "key": "cpi", "label": "Indeks Persepsi Korupsi", "value": "34/100", "rank": 115, "total": 180, "pct": 19,
+        "trend": "stagnan", "metric": "Skor CPI (0–100)", "source": "Transparency International, CPI 2024",
+        "source_url": "https://www.transparency.org/en/cpi/2024",
+        "note": "Skor stagnan satu dekade; dua pertiga negara dunia mencetak di bawah 50.",
+        "description": "Corruption Perceptions Index (CPI) mengukur persepsi korupsi di sektor publik berdasarkan gabungan survei ahli dan pelaku bisnis. Skala 0 berarti sangat korup dan 100 berarti sangat bersih.\n\nIndonesia mencetak skor 34 dan bertengger di peringkat 115 dari 180 negara — jauh di bawah Singapura (83) dan bahkan Timor Leste. Yang paling mengkhawatirkan bukan angkanya, melainkan stagnansinya: selama satu dekade terakhir skor Indonesia nyaris tidak bergerak.\n\nTransparency International mencatat negara-negara dengan lembaga antikorupsi yang dilemahkan dan kebebasan pers yang menurun cenderung terjebak pada skor rendah — dua hal yang kini sama-sama dialami Indonesia.",
+        "trend_data": [
+            {"year": "2020", "value": 37}, {"year": "2021", "value": 38}, {"year": "2022", "value": 34},
+            {"year": "2023", "value": 34}, {"year": "2024", "value": 34},
+        ],
+    },
+    {
+        "key": "press", "label": "Kebebasan Pers", "value": "Peringkat 111", "rank": 111, "total": 180, "pct": 38,
+        "trend": "turun", "metric": "Peringkat (lebih kecil lebih baik)", "source": "Reporters Without Borders, 2025",
+        "source_url": "https://rsf.org/en/index",
+        "note": "Kekerasan terhadap jurnalis dan kriminalisasi UU ITE jadi catatan merah.",
+        "description": "World Press Freedom Index dari Reporters Without Borders (RSF) menilai kemampuan jurnalis di 180 negara untuk bekerja bebas dan aman. Indonesia berada di peringkat 111 — tertinggal dari Timor Leste (39) yang jauh lebih muda sebagai negara.\n\nRSF menyoroti tiga hal: kekerasan dan intimidasi terhadap jurnalis yang jarang diproses hukum, pasal-pasal karet UU ITE yang dipakai mengkriminalisasi liputan kritis, serta konsentrasi kepemilikan media di tangan konglomerat yang sekaligus aktor politik.\n\nAliansi Jurnalis Independen mencatat puluhan kasus kekerasan terhadap jurnalis setiap tahunnya. Ketika pers yang mengawasi kekuasaan justru dikerdilkan, skandal-skandal di situs ini menjadi lebih mudah disembunyikan.",
+        "trend_data": [
+            {"year": "2021", "value": 113}, {"year": "2022", "value": 117}, {"year": "2023", "value": 108},
+            {"year": "2024", "value": 111}, {"year": "2025", "value": 111},
+        ],
+    },
+    {
+        "key": "iq", "label": "IQ Rata-Rata", "value": "78,5", "rank": 130, "total": 199, "pct": 35,
+        "trend": "stagnan", "metric": "IQ rata-rata", "source": "World Population Review (diperdebatkan)",
+        "source_url": "https://www.worldpopulationreview.com/country-rankings/average-iq-by-country",
+        "note": "Metodologi diperdebatkan para ahli, namun angkanya kerap dikutip publik.",
+        "description": "Angka IQ rata-rata nasional yang dikutip World Population Review menempatkan Indonesia pada skor 78,5 — jauh di bawah rata-rata global 100. Angka ini sempat viral dan memicu perdebatan nasional.\n\nPara ahli mengingatkan bahwa metodologi pengukuran IQ lintas negara sangat problematis: sampel tidak merata, bias bahasa dan budaya dalam soal, serta kualitas studi yang beragam. Angka ini bukan cermin kecerdasan genetik bangsa.\n\nNamun ia menjadi pengingat yang keras tentang persoalan nyata: stunting, gizi buruk pada masa emas perkembangan otak, dan kualitas pendidikan yang timpang antardaerah. Solusinya bukan membantah angkanya, melainkan memperbaiki akarnya.",
+        "trend_data": [
+            {"year": "2021", "value": 78.9}, {"year": "2022", "value": 78.7}, {"year": "2023", "value": 78.5},
+            {"year": "2024", "value": 78.5}, {"year": "2025", "value": 78.5},
+        ],
+    },
+    {
+        "key": "education", "label": "Indeks Pendidikan (HDI)", "value": "0,728", "rank": 113, "total": 193, "pct": 41,
+        "trend": "naik", "metric": "Nilai HDI (0–1)", "source": "UNDP, Laporan HDI 2025",
+        "source_url": "https://hdr.undp.org",
+        "note": "Rata-rata lama sekolah masih di bawah 13 tahun.",
+        "description": "Human Development Index (HDI) dari UNDP menggabungkan kesehatan, pendidikan, dan pendapatan menjadi satu angka. Indonesia mencetak 0,728 dan berada di peringkat 113 dari 193 negara — kategori pembangunan manusia tinggi, namun papan bawah.\n\nKomponen pendidikan menjadi pemberat utama: rata-rata lama sekolah orang dewasa Indonesia masih di bawah 13 tahun, tertinggal dari Malaysia dan Thailand. Tes PISA pun menempatkan literasi dan numerasi pelajar Indonesia di kelompok bawah dunia.\n\nAnggaran pendidikan 20% dari APBN sudah diamanatkan konstitusi, namun serapan dan kualitasnya menjadi soal — banyak yang terserap untuk gaji dan seremonial, bukan perbaikan pembelajaran.",
+        "trend_data": [
+            {"year": "2021", "value": 0.705}, {"year": "2022", "value": 0.713}, {"year": "2023", "value": 0.720},
+            {"year": "2024", "value": 0.728}, {"year": "2025", "value": 0.728},
+        ],
+    },
+    {
+        "key": "health", "label": "Keamanan Kesehatan Global", "value": "50,4/100", "rank": 30, "total": 195, "pct": 15,
+        "trend": "naik", "metric": "Skor GHS (0–100)", "source": "Global Health Security Index 2021",
+        "source_url": "https://www.ghsindex.org",
+        "note": "Pandemi mengekspos kesenjangan fasilitas kesehatan antardaerah.",
+        "description": "Global Health Security Index menilai kesiapan 195 negara menghadapi wabah dan darurat kesehatan. Indonesia mencetak 50,4 dari 100 — lebih baik dari rata-rata global, namun jauh dari kata aman.\n\nPandemi Covid-19 membuktikan rapuhnya fondasi itu: fasilitas kesehatan di luar Jawa kewalahan, oksigen langka, dan data yang simpang siur memperlambat respons. Kesenjangan dokter dan puskesmas antardaerah hingga kini belum terjembatani.\n\nIndeks ini diterbitkan berkala, sehingga datanya tidak diperbarui setiap tahun — dua titik data terakhir menunjukkan penurunan skor yang belum dipulihkan.",
+        "trend_data": [
+            {"year": "2019", "value": 56.6}, {"year": "2021", "value": 50.4},
+        ],
+    },
+    {
+        "key": "gdp", "label": "PDB Nominal", "value": "US$ 1,4 T", "rank": 16, "total": 190, "pct": 8,
+        "trend": "naik", "metric": "PDB (US$ triliun)", "source": "IMF, World Economic Outlook 2025",
+        "source_url": "https://www.imf.org/en/Publications/WEO",
+        "note": "Ekonomi terbesar ASEAN, namun PDB per kapita hanya peringkat 117.",
+        "description": "Dengan PDB nominal sekitar US$ 1,4 triliun, Indonesia adalah ekonomi terbesar di Asia Tenggara dan salah satu dari dua puluh terbesar dunia. Ini satu-satunya indeks di halaman ini di mana Indonesia tampil sebagai raksasa.\n\nNamun angka agregat menyembunyikan cerita lain: dibagi 280 juta penduduk, PDB per kapita Indonesia hanya sekitar seperlima Malaysia. Pertumbuhan ekonomi yang stabil di kisaran 5% juga dikritik karena dinikmati tidak merata.\n\nParadoks 'ekonomi besar, rakyat kecil' ini menjadi bahan bakar banyak liputan di situs ini — kekayaan nasional ada, pertanyaannya dikelola oleh dan untuk siapa.",
+        "trend_data": [
+            {"year": "2021", "value": 1.19}, {"year": "2022", "value": 1.32}, {"year": "2023", "value": 1.37},
+            {"year": "2024", "value": 1.40}, {"year": "2025", "value": 1.44},
+        ],
+    },
+    {
+        "key": "democracy", "label": "Indeks Demokrasi", "value": "6,44/10", "rank": 54, "total": 167, "pct": 32,
+        "trend": "turun", "metric": "Skor EIU (0–10)", "source": "The Economist Intelligence Unit, 2024",
+        "source_url": "https://www.eiu.com",
+        "note": "Status 'demokrasi cacat' bertahan sejak 2017.",
+        "description": "Indeks Demokrasi dari Economist Intelligence Unit menilai 167 negara dari lima aspek: pemilu, kebebasan sipil, fungsi pemerintah, partisipasi, dan budaya politik. Skor Indonesia 6,44 menempatkannya pada kategori 'demokrasi cacat' (flawed democracy).\n\nStatus itu bertahan sejak 2017 dan cenderung menurun. EIU mencatat pelemahan lembaga antikorupsi, pengecilan ruang sipil, dan dominasi kekuasaan yang tidak diimbangi oposisi yang sehat.\n\nTurunnya kualitas demokrasi bukan sekadar angka — ia terasa pada bagaimana putusan MK dipermainkan, bagaimana RUU disahkan kilat, dan bagaimana kritik dibungkam. Semua terdokumentasi di arsip situs ini.",
+        "trend_data": [
+            {"year": "2020", "value": 6.48}, {"year": "2021", "value": 6.71}, {"year": "2022", "value": 6.71},
+            {"year": "2023", "value": 6.53}, {"year": "2024", "value": 6.44},
+        ],
+    },
+    {
+        "key": "happiness", "label": "Indeks Kebahagiaan Dunia", "value": "5,62/10", "rank": 83, "total": 147, "pct": 34,
+        "trend": "naik", "metric": "Skor kebahagiaan (0–10)", "source": "World Happiness Report 2025",
+        "source_url": "https://worldhappiness.report",
+        "note": "Posisi membaik dua tahun terakhir, namun jauh di bawah negara-negara Nordik (7,7+).",
+        "description": "World Happiness Report menilai kebahagiaan warga 147 negara lewat survei Gallup: dukungan sosial, kebebasan memilih, persepsi korupsi, kemurahan hati, dan pendapatan. Indonesia mencetak 5,62 dan berada di peringkat 83.\n\nMenariknya, faktor pemberat Indonesia bukan pendapatan, melainkan persepsi korupsi dan rendahnya kepercayaan terhadap institusi. Negara yang warganya percaya pemerintahnya bersih secara konsisten lebih bahagia.\n\nPosisi Indonesia membaik dalam dua tahun terakhir, namun tetap tertinggal dari sebagian besar tetangganya di Asia Tenggara.",
+        "trend_data": [
+            {"year": "2021", "value": 5.35}, {"year": "2022", "value": 5.24}, {"year": "2023", "value": 5.28},
+            {"year": "2024", "value": 5.57}, {"year": "2025", "value": 5.62},
+        ],
+    },
+    {
+        "key": "gdppc", "label": "PDB per Kapita", "value": "US$ 4.980", "rank": 117, "total": 190, "pct": 22,
+        "trend": "naik", "metric": "US$ ribu per kapita", "source": "IMF, World Economic Outlook 2025",
+        "source_url": "https://www.imf.org/en/Publications/WEO",
+        "note": "Tertinggal jauh dari Malaysia (US$ 13 ribu) dan Thailand (US$ 7 ribu).",
+        "description": "Jika PDB total membuat Indonesia tampak raksasa, PDB per kapita membongkar ilusinya: sekitar US$ 4.980 per orang per tahun, menempatkan Indonesia di peringkat 117 dunia — satu kelompok dengan negara-negara Afrika berkembang.\n\nAngka ini menjelaskan banyak hal: mengapa kenaikan harga BBM menyakitkan, mengapa potongan gaji 3% untuk Tapera memicu protes, dan mengapa jutaan keluarga masih hidup pas-pasan meski negara disebut ekonomi terbesar ASEAN.\n\nTarget menjadi negara berpenghasilan tinggi pada 2045 menuntut pertumbuhan yang jauh lebih cepat dan lebih merata daripada sekarang.",
+        "trend_data": [
+            {"year": "2021", "value": 4.35}, {"year": "2022", "value": 4.80}, {"year": "2023", "value": 4.95},
+            {"year": "2024", "value": 4.98}, {"year": "2025", "value": 5.10},
+        ],
+    },
+    {
+        "key": "innovation", "label": "Indeks Inovasi Global", "value": "30,6/100", "rank": 54, "total": 133, "pct": 45,
+        "trend": "stagnan", "metric": "Skor GII (0–100)", "source": "WIPO, Global Innovation Index 2024",
+        "source_url": "https://www.wipo.int/global_innovation_index",
+        "note": "Input inovasi cukup, output inovasi lemah — riset jarang jadi produk.",
+        "description": "Global Innovation Index dari WIPO mengukur ekosistem inovasi 133 negara: institusi, riset, infrastruktur, dan kecanggihan bisnis. Indonesia berada di peringkat 54 dengan skor 30,6.\n\nParadoksnya klasik: belanja riset dan jumlah kampus tidak sedikit, namun paten, publikasi berdampak, dan produk teknologi yang dihasilkan jauh di bawah potensi. Riset lebih sering berakhir di lemari arsip daripada di pasar.\n\nPeleburan lembaga riset ke BRIN dan efisiensi anggaran penelitian menambah pertanyaan baru tentang masa depan sains di Indonesia.",
+        "trend_data": [
+            {"year": "2021", "value": 27.1}, {"year": "2022", "value": 30.4}, {"year": "2023", "value": 30.3},
+            {"year": "2024", "value": 30.6}, {"year": "2025", "value": 30.6},
+        ],
+    },
+    {
+        "key": "egov", "label": "Pemerintahan Digital (e-Gov)", "value": "0,7611", "rank": 64, "total": 193, "pct": 50,
+        "trend": "naik", "metric": "EGDI (0–1)", "source": "UN E-Government Survey 2024",
+        "source_url": "https://publicadministration.un.org/egovkb",
+        "note": "Digitalisasi layanan publik mendorong kenaikan peringkat dua tahun terakhir.",
+        "description": "E-Government Development Index (EGDI) dari PBB menilai seberapa baik 193 negara mendigitalkan layanan publiknya. Indonesia mencetak 0,7611 dan naik ke peringkat 64 — salah satu dari sedikit indeks yang membaik signifikan.\n\nKenaikan ini ditopang program SPBE (Sistem Pemerintahan Berbasis Elektronik): aplikasi layanan satu pintu, tanda tangan digital, dan integrasi data kependudukan. Namun praktiknya masih timpang — satu warga bisa punya belasan aplikasi pemerintah yang tidak saling terhubung.\n\nPertanyaan kritisnya: digitalisasi juga memperbesar risiko kebocoran data pribadi, yang sudah beberapa kali terjadi pada basis data negara.",
+        "trend_data": [
+            {"year": "2020", "value": 0.661}, {"year": "2022", "value": 0.716}, {"year": "2024", "value": 0.761},
+        ],
+    },
+    {
+        "key": "hunger", "label": "Indeks Kelaparan Global", "value": "16,9 (Serius)", "rank": 72, "total": 127, "pct": 28,
+        "trend": "naik", "metric": "Skor GHI (lebih kecil lebih baik)", "source": "Global Hunger Index 2024",
+        "source_url": "https://www.globalhungerindex.org",
+        "note": "Sekitar 1 dari 5 balita Indonesia masih mengalami stunting.",
+        "description": "Global Hunger Index menggabungkan kekurangan gizi, stunting, wasting, dan kematian anak di 127 negara. Skor Indonesia 16,9 masuk kategori 'serius' — membaik perlahan, tetapi masih memalukan untuk negara G20.\n\nStunting menjadi persoalan paling keras kepala: sekitar satu dari lima balita Indonesia tumbuh kerdil karena kekurangan gizi kronis pada seribu hari pertama kehidupan. Dampaknya permanen terhadap perkembangan kognitif — dan berkaitan langsung dengan indeks IQ dan pendidikan di halaman ini.\n\nInilah konteks yang membuat program makan bergizi gratis penting sekaligus ironis: gagasannya menjawab masalah nyata, namun implementasinya yang bermasalah justru meracuni anak-anak yang seharusnya diselamatkan.",
+        "trend_data": [
+            {"year": "2016", "value": 21.9}, {"year": "2020", "value": 19.1}, {"year": "2024", "value": 16.9},
+        ],
+    },
 ]
 
 
@@ -453,24 +660,34 @@ async def seed_data():
             "role": "admin",
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
-    if await db.articles.count_documents({}) == 0:
-        now = datetime.now(timezone.utc)
-        docs = []
-        for i, a in enumerate(SEED_ARTICLES):
-            doc = dict(a)
-            doc.update({
-                "id": uuid.uuid4().hex,
-                "slug": slugify(a["title"]),
-                "published_at": (now - timedelta(days=i * 3 + 1)).isoformat(),
-                "views": 0,
-                "reactions": {"marah": 12 + i * 3, "kecewa": 8 + i * 2, "waspada": 5 + i},
-            })
-            docs.append(doc)
+    now = datetime.now(timezone.utc)
+    existing_titles = {d["title"] async for d in db.articles.find({}, {"title": 1})}
+    docs = []
+    for i, a in enumerate(SEED_ARTICLES):
+        if a["title"] in existing_titles:
+            continue
+        doc = dict(a)
+        doc.update({
+            "id": uuid.uuid4().hex,
+            "slug": slugify(a["title"]),
+            "published_at": (now - timedelta(hours=i + 1)).isoformat(),
+            "views": 0,
+            "reactions": {"marah": 12 + i * 3, "kecewa": 8 + i * 2, "waspada": 5 + i},
+        })
+        docs.append(doc)
+    if docs:
         await db.articles.insert_many(docs)
     if await db.scandals.count_documents({}) == 0:
         await db.scandals.insert_many([{**s, "id": uuid.uuid4().hex} for s in SEED_SCANDALS])
-    if await db.rankings.count_documents({}) == 0:
-        await db.rankings.insert_many(SEED_RANKINGS)
+    for r in SEED_RANKINGS:
+        shared = ("label", "total", "pct", "trend", "metric", "source", "source_url", "description", "trend_data")
+        set_fields = {k: r[k] for k in shared if k in r}
+        insert_fields = {k: v for k, v in r.items() if k not in set_fields}
+        await db.rankings.update_one(
+            {"key": r["key"]},
+            {"$set": set_fields, "$setOnInsert": insert_fields},
+            upsert=True,
+        )
 
 
 @api_router.get("/")

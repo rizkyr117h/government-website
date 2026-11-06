@@ -25,8 +25,18 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 - curl: health, articles (8), rankings (7), scandals (6), login→/me→admin/comments, article create→fetch→react→comment→delete.
 - Screenshots: home 1366/768/375, rankings, tracker, article detail, admin login→panel→form→comments tab, comment submission toast.
 
+## Implemented (2026-11-06, ronde 2)
+- Halaman detail per indeks peringkat (/peringkat/:key): grafik tren tahunan (recharts LineChart), badge tren (Membaik/Memburuk/Stagnan), deskripsi analisis, tautan sumber eksternal, navigasi antar-indeks. Endpoint GET /api/rankings/{key}.
+- 5 kategori indeks baru (total 12): Indeks Kebahagiaan, PDB per Kapita, Indeks Inovasi Global, Pemerintahan Digital (e-Gov), Indeks Kelaparan Global. Seed rankings kini upsert (preserves nilai/rank/catatan hasil edit admin).
+- Kategori artikel baru "Media Sosial" + 3 artikel influencer (Indonesia Gelap, Influencer di Istana, Ekonomi Buzzer).
+- 4 artikel baru tentang pemerintahan Prabowo: kabinet gemuk, efisiensi anggaran Rp 306 T, Makan Bergizi Gratis (keracunan massal), Danantara. Total 15 artikel. Seed artikel sekarang menambahkan artikel baru tanpa menimpa yang ada.
+
+## Verified (ronde 2)
+- curl: 15 artikel, 12 ranking, detail /rankings/cpi (5 titik tren + source_url).
+- Screenshots: grid 12 kartu peringkat, halaman detail CPI dengan grafik, filter Media Sosial (3 artikel), mobile 375px detail peringkat.
+
 ## Backlog
 - P0: (none — core shipped)
-- P1: AI penulis berita (daily scandal digest dari berita terbaru), detail halaman peringkat dengan grafik tren tahunan, edisi mingguan PDF/email newsletter.
+- P1: AI penulis berita (daily scandal digest dari berita terbaru), edisi mingguan PDF/email newsletter.
 - P2: halaman skandal per kasus dengan timeline interaktif, pencarian teks penuh, mode gelap, share card OG image per artikel.
 - Next tasks: publish/deploy when user ready; collect editorial images per artikel.

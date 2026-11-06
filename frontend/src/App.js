@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import ArticleDetail from "@/pages/ArticleDetail";
 import LoginPage from "@/pages/LoginPage";
 import AdminPanel from "@/pages/AdminPanel";
+import RankingDetail from "@/pages/RankingDetail";
 
 function SmoothScroll() {
   useEffect(() => {
@@ -44,6 +45,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/artikel/:slug" element={<ArticleDetail />} />
+            <Route path="/peringkat/:key" element={<RankingDetail />} />
             <Route path="/masuk" element={<LoginPage />} />
             <Route path="/admin" element={<AdminPanel />} />
           </Routes>
