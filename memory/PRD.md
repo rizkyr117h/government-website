@@ -31,6 +31,15 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 - Kategori artikel baru "Media Sosial" + 3 artikel influencer (Indonesia Gelap, Influencer di Istana, Ekonomi Buzzer).
 - 4 artikel baru tentang pemerintahan Prabowo: kabinet gemuk, efisiensi anggaran Rp 306 T, Makan Bergizi Gratis (keracunan massal), Danantara. Total 15 artikel. Seed artikel sekarang menambahkan artikel baru tanpa menimpa yang ada.
 
+## Implemented (2026-11-06, ronde 3)
+- Kenaikan Peringkat Alert: badge kedip merah "MEMBURUK" (animate-ping) di kartu indeks bertren turun + ringkasan "N indeks memburuk" di judul seksi; bar progres ikut berdenyut.
+- Edisi Mingguan: GET /api/edisi-mingguan → halaman HTML print-ready A4 (masthead, 6 liputan terbaru, tabel arsip skandal + rapor peringkat) yang otomatis membuka dialog cetak (Simpan sebagai PDF). Tautan di header ("Edisi Mingguan") dan footer.
+- Konten Sosial: rubrik "Konten yang Memberitakan Kabar Buruk" — kurasi 10 kanal/influencer (Geolive, Kok Bisa, Najwa Shihab/Narasi, Tirta, Fahri Hamzah, Pijaru, Fadil Jaidi, Watchdoc, Project Multatuli, Eko Kuntadhi) dengan filter platform (Instagram/YouTube/Facebook/TikTok/X). Admin tab "Kanal Sosial" untuk CRUD kurasi.
+
+## Verified (ronde 3)
+- curl: /api/channels (10), /api/edisi-mingguan 200 OK 10.4KB HTML.
+- Screenshots: badge MEMBURUK pada Kebebasan Pers & Indeks Demokrasi, grid kanal sosial, filter YouTube (4 kanal), halaman edisi mingguan print-ready, mobile 375px.
+
 ## Verified (ronde 2)
 - curl: 15 artikel, 12 ranking, detail /rankings/cpi (5 titik tren + source_url).
 - Screenshots: grid 12 kartu peringkat, halaman detail CPI dengan grafik, filter Media Sosial (3 artikel), mobile 375px detail peringkat.

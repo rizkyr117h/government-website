@@ -30,13 +30,16 @@ export default function AdminPanel() {
   const [articles, setArticles] = useState([]);
   const [comments, setComments] = useState([]);
   const [rankings, setRankings] = useState([]);
+  const [channels, setChannels] = useState([]);
   const [editing, setEditing] = useState(null);
+  const [editingChannel, setEditingChannel] = useState(null);
 
   useEffect(() => {
     if (!user) return;
     api.get("/articles").then((r) => setArticles(r.data));
     api.get("/admin/comments").then((r) => setComments(r.data));
     api.get("/rankings").then((r) => setRankings(r.data));
+    api.get("/channels").then((r) => setChannels(r.data));
   }, [user]);
 
   if (user === null) {
@@ -93,10 +96,36 @@ export default function AdminPanel() {
     }
   };
 
+  const saveChannel = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingChannel.id) {
+        const { data } = await api.put(`/admin/channels/${editingChannel.id}`, editingChannel);
+        setChannels((cs) => cs.map((c) => (c.id === data.id ? data : c)));
+        toast.success("Kanal diperbarui.");
+      } else {
+        const { data } = await api.post("/admin/channels", editingChannel);
+        setChannels((cs) => [data, ...cs]);
+        toast.success("Kanal ditambahkan.");
+      }
+      setEditingChannel(null);
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail));
+    }
+  };
+
+  const deleteChannel = async (id) => {
+    if (!window.confirm("Hapus kanal ini dari kurasi?")) return;
+    await api.delete(`/admin/channels/${id}`);
+    setChannels((cs) => cs.filter((c) => c.id !== id));
+    toast.success("Kanal dihapus.");
+  };
+
   const TABS = [
     ["artikel", "Artikel", Newspaper],
     ["komentar", "Komentar", MessageSquare],
     ["peringkat", "Peringkat", BarChart3],
+    ["kanal", "Kanal Sosial", MessageSquare],
   ];
 
   return (
@@ -258,6 +287,91 @@ export default function AdminPanel() {
                     </button>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "kanal" && (
+          <div>
+            {editingChannel ? (
+              <form onSubmit={saveChannel} className="border-2 border-slate-900 bg-white p-6" data-testid="channel-form">
+                <div className="mb-5 flex items-center justify-between">
+                  <h2 className="font-serif text-xl font-bold text-slate-900">
+                    {editingChannel.id ? "Sunting Kanal" : "Tambah Kanal Baru"}
+                  </h2>
+                  <button type="button" onClick={() => setEditingChannel(null)} data-testid="channel-form-cancel" className="text-slate-400 hover:text-red-700">
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Nama Kanal</label>
+                    <input required value={editingChannel.name} onChange={(e) => setEditingChannel({ ...editingChannel, name: e.target.value })} data-testid="channel-name-input" className={inputCls} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Handle</label>
+                    <input required value={editingChannel.handle} onChange={(e) => setEditingChannel({ ...editingChannel, handle: e.target.value })} data-testid="channel-handle-input" className={inputCls} placeholder="@namakana" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Platform</label>
+                    <select value={editingChannel.platform} onChange={(e) => setEditingChannel({ ...editingChannel, platform: e.target.value })} data-testid="channel-platform-select" className={inputCls}>
+                      {["Instagram", "YouTube", "Facebook", "TikTok", "X"].map((p) => <option key={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Pengikut</label>
+                    <input value={editingChannel.followers} onChange={(e) => setEditingChannel({ ...editingChannel, followers: e.target.value })} data-testid="channel-followers-input" className={inputCls} placeholder="2,1 jt" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">URL Kanal</label>
+                    <input value={editingChannel.url} onChange={(e) => setEditingChannel({ ...editingChannel, url: e.target.value })} data-testid="channel-url-input" className={inputCls} placeholder="https://…" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Fokus Konten</label>
+                    <textarea rows={2} value={editingChannel.focus} onChange={(e) => setEditingChannel({ ...editingChannel, focus: e.target.value })} data-testid="channel-focus-input" className={inputCls} />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  data-testid="channel-save-button"
+                  className="mt-5 inline-flex items-center gap-2 border-2 border-slate-900 bg-slate-900 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-700 hover:border-red-700"
+                >
+                  <Save size={14} /> Simpan
+                </button>
+              </form>
+            ) : (
+              <div>
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="font-serif text-2xl font-bold text-slate-900">Kurasi Kanal Sosial ({channels.length})</h2>
+                  <button
+                    onClick={() => setEditingChannel({ name: "", handle: "", platform: "Instagram", followers: "", focus: "", url: "" })}
+                    data-testid="channel-new-button"
+                    className="flex items-center gap-2 border-2 border-slate-900 bg-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-700 hover:border-red-700"
+                  >
+                    <Plus size={14} /> Kanal Baru
+                  </button>
+                </div>
+                <div className="divide-y divide-slate-200 border border-slate-300 bg-white" data-testid="admin-channel-list">
+                  {channels.map((c) => (
+                    <div key={c.id} className="flex items-center justify-between gap-4 px-4 py-3" data-testid={`admin-channel-${c.id}`}>
+                      <div className="min-w-0">
+                        <p className="truncate font-serif text-sm font-bold text-slate-900">{c.name}</p>
+                        <p className="text-[11px] font-mono uppercase tracking-wider text-slate-500">
+                          {c.platform} · {c.handle} · {c.followers}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <button onClick={() => setEditingChannel({ ...c })} data-testid={`channel-edit-${c.id}`} className="border border-slate-300 p-2 text-slate-600 transition-colors hover:border-slate-900 hover:text-slate-900" aria-label="Sunting">
+                          <Pencil size={14} />
+                        </button>
+                        <button onClick={() => deleteChannel(c.id)} data-testid={`channel-delete-${c.id}`} className="border border-slate-300 p-2 text-slate-600 transition-colors hover:border-red-700 hover:text-red-700" aria-label="Hapus">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

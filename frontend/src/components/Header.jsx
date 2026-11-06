@@ -51,8 +51,20 @@ export default function Header() {
           <a href="#peringkat" onClick={scrollTo("peringkat")} data-testid="nav-peringkat" className="transition-colors hover:text-red-700">
             Peringkat Dunia
           </a>
+          <a href="#konten-sosial" onClick={scrollTo("konten-sosial")} data-testid="nav-konten-sosial" className="transition-colors hover:text-red-700">
+            Konten Sosial
+          </a>
         </nav>
         <div className="flex items-center gap-2">
+          <a
+            href={`${process.env.REACT_APP_BACKEND_URL}/api/edisi-mingguan`}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="header-edisi-link"
+            className="hidden h-10 items-center gap-2 border border-red-700 bg-red-700 px-3 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-red-800 sm:flex"
+          >
+            Edisi Mingguan
+          </a>
           <a
             href="#pencarian"
             onClick={scrollTo("pencarian")}

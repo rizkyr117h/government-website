@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 import ArticleFeed from "@/components/ArticleFeed";
 import WorldRankings from "@/components/WorldRankings";
 import ScandalTracker from "@/components/ScandalTracker";
+import SocialChannels from "@/components/SocialChannels";
 import Footer from "@/components/Footer";
 import { api } from "@/lib/api";
 
@@ -11,19 +12,22 @@ export default function Home() {
   const [articles, setArticles] = useState([]);
   const [scandals, setScandals] = useState([]);
   const [rankings, setRankings] = useState([]);
+  const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const [a, s, r] = await Promise.all([
+        const [a, s, r, c] = await Promise.all([
           api.get("/articles"),
           api.get("/scandals"),
           api.get("/rankings"),
+          api.get("/channels"),
         ]);
         setArticles(a.data);
         setScandals(s.data);
         setRankings(r.data);
+        setChannels(c.data);
       } catch (e) {
         console.error(e);
       } finally {
@@ -45,6 +49,7 @@ export default function Home() {
           <ArticleFeed articles={articles} />
           <WorldRankings rankings={rankings} />
           <ScandalTracker scandals={scandals} />
+          <SocialChannels channels={channels} />
         </main>
       )}
       <Footer />

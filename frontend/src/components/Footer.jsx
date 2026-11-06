@@ -20,6 +20,18 @@ export default function Footer() {
             <li><a href="#pencarian" className="transition-colors hover:text-red-700" data-testid="footer-liputan">Liputan Terbaru</a></li>
             <li><a href="#arsip" className="transition-colors hover:text-red-700" data-testid="footer-arsip">Arsip Skandal</a></li>
             <li><a href="#peringkat" className="transition-colors hover:text-red-700" data-testid="footer-peringkat">Peringkat Dunia</a></li>
+            <li><a href="#konten-sosial" className="transition-colors hover:text-red-700" data-testid="footer-konten-sosial">Konten Sosial</a></li>
+            <li>
+              <a
+                href={`${process.env.REACT_APP_BACKEND_URL}/api/edisi-mingguan`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-red-700 transition-colors hover:text-red-800"
+                data-testid="footer-edisi-link"
+              >
+                Unduh Edisi Mingguan (PDF)
+              </a>
+            </li>
           </ul>
         </div>
         <div>

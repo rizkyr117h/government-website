@@ -12,6 +12,7 @@ import bcrypt
 import jwt
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query, Request, Response
+from fastapi.responses import HTMLResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 from pymongo import ASCENDING, DESCENDING, IndexModel
@@ -335,6 +336,156 @@ async def update_ranking(key: str, input: RankingInput, user=Depends(get_current
     return await db.rankings.find_one({"key": key}, {"_id": 0})
 
 
+# ---------------- Social Channels (kurasi konten media sosial) ----------------
+
+class ChannelInput(BaseModel):
+    name: str
+    handle: str
+    platform: str  # Instagram | YouTube | Facebook | TikTok | X
+    followers: str = ""
+    focus: str = ""
+    url: str = ""
+
+
+@api_router.get("/channels")
+async def list_channels():
+    return await db.channels.find({}, {"_id": 0}).to_list(100)
+
+
+@api_router.post("/admin/channels")
+async def create_channel(input: ChannelInput, user=Depends(get_current_user)):
+    doc = input.model_dump()
+    doc["id"] = uuid.uuid4().hex
+    await db.channels.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.put("/admin/channels/{channel_id}")
+async def update_channel(channel_id: str, input: ChannelInput, user=Depends(get_current_user)):
+    await db.channels.update_one({"id": channel_id}, {"$set": input.model_dump()})
+    return await db.channels.find_one({"id": channel_id}, {"_id": 0})
+
+
+@api_router.delete("/admin/channels/{channel_id}")
+async def delete_channel(channel_id: str, user=Depends(get_current_user)):
+    await db.channels.delete_one({"id": channel_id})
+    return {"ok": True}
+
+
+# ---------------- Edisi Mingguan (PDF-ready print page) ----------------
+
+@api_router.get("/edisi-mingguan", response_class=HTMLResponse)
+async def edisi_mingguan():
+    articles = await db.articles.find({}, {"_id": 0}).sort("published_at", -1).to_list(6)
+    scandals = await db.scandals.find({}, {"_id": 0}).to_list(6)
+    rankings = await db.rankings.find({}, {"_id": 0}).to_list(12)
+
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(days=now.weekday() + 1)
+    fmt = lambda d: d.strftime("%d %B %Y")
+    edition_range = f"{fmt(start)} — {fmt(now)}"
+
+    def esc(t):
+        return (t or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    def fmt_date(iso):
+        try:
+            return datetime.fromisoformat(iso).strftime("%d %B %Y")
+        except Exception:
+            return ""
+
+    article_html = ""
+    for i, a in enumerate(articles):
+        article_html += f"""
+        <article class="story">
+          <div class="story-num">{i + 1:02d}</div>
+          <div>
+            <p class="story-meta">{esc(a['category'])} · {esc(a['severity'])} · {fmt_date(a['published_at'])}</p>
+            <h3 class="story-title">{esc(a['title'])}</h3>
+            <p class="story-dek">{esc(a['dek'])}</p>
+            <p class="story-byline">{esc(a['author'])}{(' · Kerugian: ' + esc(a['loss_estimate'])) if a.get('loss_estimate') else ''}</p>
+          </div>
+        </article>"""
+
+    scandal_rows = "".join(
+        f"<tr><td>{esc(s['title'])}</td><td>{esc(s['actor'])}</td><td class='loss'>{esc(s['loss'])}</td><td>{esc(s['status'])}</td></tr>"
+        for s in scandals
+    )
+    ranking_rows = "".join(
+        f"<tr><td>{esc(r['label'])}</td><td class='val'>{esc(r['value'])}</td><td>#{r['rank']} / {r['total']}</td></tr>"
+        for r in rankings
+    )
+
+    html = f"""<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Edisi Mingguan — Kabar Buruk · {edition_range}</title>
+<style>
+  @page {{ size: A4; margin: 18mm; }}
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  body {{ font-family: Georgia, 'Times New Roman', serif; color: #0F172A; background: #FAF8F5; padding: 32px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
+  .masthead {{ display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid #0F172A; padding-bottom: 14px; }}
+  .brand {{ font-size: 34px; font-weight: 900; letter-spacing: -0.5px; }}
+  .brand .k {{ display: inline-block; background: #DC2626; color: #fff; padding: 2px 9px; margin-right: 8px; border-radius: 4px; }}
+  .edition {{ font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; text-align: right; color: #475569; }}
+  .edition strong {{ color: #DC2626; display: block; font-size: 13px; margin-top: 3px; }}
+  .tagline {{ font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: #DC2626; border-bottom: 1px solid #0F172A; padding: 8px 0; }}
+  h2 {{ font-size: 18px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #0F172A; margin: 28px 0 14px; padding-bottom: 6px; }}
+  .story {{ display: flex; gap: 18px; padding: 14px 0; border-bottom: 1px solid #CBD5E1; break-inside: avoid; }}
+  .story-num {{ font-size: 28px; font-weight: 900; color: #DC2626; line-height: 1; min-width: 42px; }}
+  .story-meta {{ font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: #DC2626; margin-bottom: 4px; }}
+  .story-title {{ font-size: 17px; font-weight: 800; line-height: 1.25; margin-bottom: 5px; }}
+  .story-dek {{ font-size: 12.5px; line-height: 1.5; color: #334155; }}
+  .story-byline {{ font-family: 'Courier New', monospace; font-size: 9.5px; color: #64748B; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }}
+  table {{ width: 100%; border-collapse: collapse; font-size: 11.5px; }}
+  th {{ font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: #64748B; text-align: left; border-bottom: 2px solid #0F172A; padding: 6px 8px 6px 0; }}
+  td {{ border-bottom: 1px solid #E2E8F0; padding: 7px 8px 7px 0; vertical-align: top; }}
+  .loss {{ color: #DC2626; font-weight: 700; }}
+  .val {{ font-weight: 800; }}
+  .cols {{ display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }}
+  .footer {{ margin-top: 28px; border-top: 4px solid #0F172A; padding-top: 10px; font-family: 'Courier New', monospace; font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: #64748B; display: flex; justify-content: space-between; }}
+  @media print {{ body {{ padding: 0; }} }}
+</style>
+</head>
+<body>
+  <div class="masthead">
+    <div class="brand"><span class="k">K</span>KABAR BURUK</div>
+    <div class="edition">Edisi Mingguan<strong>{edition_range}</strong></div>
+  </div>
+  <p class="tagline">Berita yang tak enak didengar penguasa — arsip cetak untuk dibaca & dibagikan</p>
+
+  <h2>Liputan Utama Pekan Ini</h2>
+  {article_html}
+
+  <div class="cols">
+    <section>
+      <h2>Arsip Skandal</h2>
+      <table>
+        <thead><tr><th>Kasus</th><th>Aktor</th><th>Kerugian</th><th>Status</th></tr></thead>
+        <tbody>{scandal_rows}</tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Rapor Peringkat Dunia</h2>
+      <table>
+        <thead><tr><th>Indeks</th><th>Nilai</th><th>Peringkat</th></tr></thead>
+        <tbody>{ranking_rows}</tbody>
+      </table>
+    </section>
+  </div>
+
+  <div class="footer">
+    <span>kabarburuk — dokumentasi & kritik jurnalistik</span>
+    <span>diterbitkan {fmt(now)}</span>
+  </div>
+  <script>window.onload = () => window.print()</script>
+</body>
+</html>"""
+    return HTMLResponse(html)
+
+
 # ---------------- Seed ----------------
 
 SEED_ARTICLES = [
@@ -646,6 +797,39 @@ SEED_RANKINGS = [
     },
 ]
 
+SEED_CHANNELS = [
+    {"name": "Geolive", "handle": "@geolive.id", "platform": "YouTube", "followers": "2,1 jt",
+     "focus": "Video esai kritis yang membedah kebijakan pemerintah dengan data — dari Danantara hingga efisiensi anggaran.",
+     "url": "https://www.youtube.com/@GeoliveID"},
+    {"name": "Kok Bisa?", "handle": "@kokbisa", "platform": "YouTube", "followers": "4,4 jt",
+     "focus": "Animasi edukasi yang menjawab pertanyaan publik soal isu politik dan sosial yang sedang ramai.",
+     "url": "https://www.youtube.com/@KokBisa"},
+    {"name": "Najwa Shihab / Narasi", "handle": "@narasi.tv", "platform": "YouTube", "followers": "12 jt",
+     "focus": "Jurnalisme investigasi dan wawancara tanpa tedeng aling — 'Mata Najwa' legendaris kini versi digital.",
+     "url": "https://www.youtube.com/@NajwaShihab"},
+    {"name": "Tirta Pengkiri Pambudi", "handle": "@tirtapengkiri", "platform": "Instagram", "followers": "3,2 jt",
+     "focus": "Dokter dan influencer yang vokal mengkritik kebijakan kesehatan dan anggaran pemerintah.",
+     "url": "https://www.instagram.com/tirtapengkiri"},
+    {"name": "Fahri Hamzah", "handle": "@fahrihamzah", "platform": "X", "followers": "1,6 jt",
+     "focus": "Mantan wakil ketua DPR yang kerap mengkritik pemerintah lewat utas panjang penuh amarah.",
+     "url": "https://x.com/fahrihamzah"},
+    {"name": "Pijaru", "handle": "@pijaru", "platform": "Instagram", "followers": "2,8 jt",
+     "focus": "Konten infografis dan video singkat yang menyederhanakan isu politik rumit untuk anak muda.",
+     "url": "https://www.instagram.com/pijaru"},
+    {"name": "Fadil Jaidi", "handle": "@fadiljaidi", "platform": "TikTok", "followers": "12 jt",
+     "focus": "Meski dikenal komedi, konten spontannya beberapa kali menyentil isu sosial-politik hingga viral.",
+     "url": "https://www.tiktok.com/@fadiljaidi"},
+    {"name": "Watchdoc Documentary", "handle": "@watchdoc", "platform": "YouTube", "followers": "1,4 jt",
+     "focus": "Rumah produksi dokumenter investigasi — 'Sexy Killers' dan 'Dandhy Laksono' tentang oligarki tambang.",
+     "url": "https://www.youtube.com/@WatchdocDocumentary"},
+    {"name": "Project Multatuli", "handle": "@projectmultatuli", "platform": "Instagram", "followers": "1,1 jt",
+     "focus": "Media kolektif yang memberitakan masyarakat pinggiran dan korban kebijakan — 'melayani yang tak dilayani'.",
+     "url": "https://www.instagram.com/projectmultatuli"},
+    {"name": "Eko Kuntadhi", "handle": "@ekokuntadhi", "platform": "Facebook", "followers": "900 rb",
+     "focus": "Komentator politik senior dengan tulisan tajam tentang kekuasaan dan demokrasi.",
+     "url": "https://www.facebook.com/ekokuntadhi"},
+]
+
 
 async def seed_data():
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com").lower()
@@ -688,6 +872,8 @@ async def seed_data():
             {"$set": set_fields, "$setOnInsert": insert_fields},
             upsert=True,
         )
+    if await db.channels.count_documents({}) == 0:
+        await db.channels.insert_many([{**c, "id": uuid.uuid4().hex} for c in SEED_CHANNELS])
 
 
 @api_router.get("/")
