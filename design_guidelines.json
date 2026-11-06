@@ -1,0 +1,113 @@
+{
+  "brand": {
+    "name": "Kabar Buruk",
+    "tagline": "Dokumentasi & Journalistik Kritis Skandal Politik Indonesia",
+    "logo_concept": "Monochrome sharp SVG mark featuring an inverted 'K' stamped inside a red-bordered headline badge with an eye or alert symbol. Usable as vector and favicon."
+  },
+  "theme": {
+    "mode": "light",
+    "description": "Editorial Broadsheet & Critical Journalism style with warm paper background (#FAF8F5), high-contrast ink charcoal text (#0F172A), stark crimson accent (#DC2626) for scandals & alerts, and crisp gridlines (#E2E8F0)."
+  },
+  "typography": {
+    "fonts": {
+      "headline": "Playfair Display, Merriweather, serif",
+      "body": "Plus Jakarta Sans, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "google_fonts_embed": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-serif text-slate-900 leading-[1.1]",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl font-bold font-serif text-slate-900 leading-snug",
+      "h3": "text-xl sm:text-2xl font-semibold font-serif text-slate-800",
+      "h4": "text-lg sm:text-xl font-bold font-sans text-slate-900",
+      "body": "text-base text-slate-700 leading-relaxed font-sans",
+      "caption": "text-xs tracking-wider uppercase font-mono text-slate-500 font-semibold"
+    }
+  },
+  "colors": {
+    "paper_bg": "#FAF8F5",
+    "card_bg": "#FFFFFF",
+    "surface_subtle": "#F1EFEA",
+    "ink_black": "#0F172A",
+    "ink_muted": "#475569",
+    "crimson_accent": "#DC2626",
+    "crimson_dark": "#991B1B",
+    "alert_yellow": "#D97706",
+    "navy_slate": "#1E293B",
+    "border_line": "#E2E8F0",
+    "border_dark": "#0F172A"
+  },
+  "layout_and_grids": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing_philosophy": "Generous newsprint margins (p-6, p-8, p-12) with 1px sharp structural borders separating columns (Swiss Grid style)",
+    "hero_layout": "Asymmetric 12-column Swiss grid: 8 cols for Lead Investigative Story with kinetic reveal, 4 cols for Live Scandal Wire & Critical Stats",
+    "rankings_grid": "MODE B High-Density 4-column Swiss Data Matrix (Indonesia vs World Benchmarks)",
+    "article_feed_grid": "Grid of 3 columns with distinct row spans for featured investigation, category badges, and loss counter",
+    "scandal_tracker_layout": "Matrix filterable timeline with status filters (Pengalihan Isu, Menggantung, Dalam Proses Hukum, Dihentikan/SP3)"
+  },
+  "key_components": [
+    {
+      "name": "Header & Navigation",
+      "path": "src/components/Header.jsx",
+      "features": "Top date/edition ribbon + slow editorial marquee, logo mark 'Kabar Buruk', search drawer trigger, category navigation, Admin portal access button, sticky glass background with blur."
+    },
+    {
+      "name": "Kinetic Hero Section",
+      "path": "src/components/Hero.jsx",
+      "features": "Masked-line reveal heading, live scandal stats ticker, full-bleed news photography with parallax, quick link to high-profile political cases."
+    },
+    {
+      "name": "Editorial Marquee",
+      "path": "src/components/EditorialMarquee.jsx",
+      "features": "Slow drift ribbon highlighting key political keywords: RUU Pilkada 2024, Kerugian Negara Rp 300T, Kebebasan Pers #111, Tapera, Dinasti Politik, Megaproyek IKN."
+    },
+    {
+      "name": "Article Feed & Filters",
+      "path": "src/components/ArticleFeed.jsx",
+      "features": "Tabs for [Semua, Korupsi, Skandal, Kontroversi, Kebijakan, Pemilu], search bar, severity badges (Bahasa Indonesia), reading time, loss estimates."
+    },
+    {
+      "name": "World Rankings Statistics Matrix",
+      "path": "src/components/WorldRankings.jsx",
+      "features": "Indonesia vs World Benchmarks: Corruption Perception Index (CPI), Press Freedom Index (Kebebasan Pers), Average IQ (IQ Rata-Rata), Education Index, Health Index, GDP ranking. Includes bar & rank visualization."
+    },
+    {
+      "name": "Scandal Tracker Archive",
+      "path": "src/components/ScandalTracker.jsx",
+      "features": "Interactive database of political scandals: Kerugian Negara counter, key actors involved, current legal status, timeline events, filtering by status & actor."
+    },
+    {
+      "name": "Article Detail Modal / Reader Comments",
+      "path": "src/components/ArticleDetail.jsx",
+      "features": "Full investigative reading view, sentiment reaction buttons (Marah, Kecewa, Waspada), reader comment submission with upvotes and replies."
+    },
+    {
+      "name": "Admin Dashboard Panel",
+      "path": "src/components/AdminPanel.jsx",
+      "features": "Secured admin login with PIN/Password, article editor with live preview, scandal case management, ranking statistics updater, reader comment moderation."
+    }
+  ],
+  "image_urls": {
+    "hero_protest": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "street_demonstration": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "police_confrontation": "https://images.unsplash.com/photo-1756142507999-ea5301f4350a?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "protest_sign": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "newspaper_press": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "newspaper_reading": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+  },
+  "instructions_to_main_agent": [
+    "Build a complete React application for 'Kabar Buruk' in JS files (React .jsx / .js, NOT .tsx).",
+    "Ensure all interactive buttons, inputs, links, tabs, forms, comment items, and admin fields contain data-testid attributes (e.g. data-testid='article-card-1', data-testid='admin-login-button').",
+    "Use Lenis for smooth scrolling and framer-motion for kinetic text reveal and entrance animations.",
+    "Implement full mock data in Bahasa Indonesia covering actual political discussions (Kasus Timah 300T, RUU Pilkada, Harun Masiku, Indeks Kebebasan Pers, IQ Rata-rata Indonesia, CPI Indeks Korupsi).",
+    "Implement functional state management: reader search filter, category switching, scandal status filtering, submitting comments, upvoting, admin authentication (PIN: 1234 or admin/admin), and admin CRUD operations.",
+    "Follow Swiss broadsheet styling: crisp 1px borders (border-slate-300), serif headings with Playfair Display, high contrast red accents, and dense structured data cards."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "You tend to converge toward generic outputs; avoid AI slop by strictly implementing bold, high-contrast broadsheet editorial styling.",
+    "Do not center-align body text or main containers. Use left-aligned newsprint layouts.",
+    "Every interactive element must have hover states, focus states, and data-testid attributes.",
+    "Do NOT use transparent dropdown backgrounds or missing contrast overlays.",
+    "Use 'sonner' for toast notifications on comment submission, article saving, and admin actions."
+  ]
+}
