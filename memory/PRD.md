@@ -56,6 +56,14 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 ## Implemented (2026-11-06, ronde 9)
 - Preview konten asli Instagram & TikTok: konten yang URL-nya mengarah ke post/reel/video spesifik kini dirender sebagai embed iframe resmi (instagram.com/.../embed/ dan tiktok.com/player/v1/...), menampilkan thumbnail asli, judul, play button, like/comment count, dan durasi — bukan lagi gambar stock. Konten non-embeddable tetap fallback ke thumbnail gambar.
 
+## Implemented (2026-11-06, ronde 10)
+- Identitas akun diperbaiki: Gerald Vincent (@geraldvincentt, TikTok) dipisahkan dari Fadil Jaidi; kanal baru Katadata (@katatadatacoid, Instagram), Partai Socmed (@partaisocmed, X), Tempo (@tempodotco, X).
+- Konten trending November 2026: pajak transaksi online 0,5%, klarifikasi Menkeu soal 9 November, reshuffle Kemenkeu (Purbaya → Suahasil).
+- Preview cuitan X: karena iframe platform.twitter.com/embed tidak merender di preview environment (blank), konten X kini menampilkan thumbnail kaya dengan overlay branding X (handle, judul, tanggal, statistik) — bukan iframe rusak. Instagram/TikTok tetap memakai embed iframe resmi.
+
+## Verified (ronde 10) — oleh troubleshoot_agent
+- Instagram embed berfungsi untuk URL /p/…; TikTok embed berfungsi untuk URL /video/…; X menampilkan preview kaya dengan benar; semua identitas kanal benar; konten trending November 2026 tersedia.
+
 ## Verified (ronde 9) — oleh troubleshoot_agent
 - Embed URL Instagram/TikTok valid (HTTP 200), FeaturedPreview merender iframe dengan fallback benar, konten "Pajak Transaksi Online" tampil sebagai preview video asli.
 

@@ -39,41 +39,81 @@ function TypeBadge({ type }) {
   );
 }
 
-// Ambil URL embed iframe resmi dari URL konten (Instagram /p/…, TikTok …/video/…)
+// Ambil URL embed iframe resmi dari URL konten (Instagram /p/…, TikTok …/video/…, X /status/…)
 function embedUrl(url) {
   if (!url) return null;
   const ig = url.match(/instagram\.com\/(p|reel|reels)\/([\w-]+)/);
   if (ig) return `https://www.instagram.com/${ig[1]}/${ig[2]}/embed/`;
   const tt = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
   if (tt) return `https://www.tiktok.com/player/v1/${tt[1]}`;
+  const tw = url.match(/(?:twitter|x)\.com\/[\w]+\/status\/(\d+)/);
+  if (tw) return `https://platform.twitter.com/embed/Tweet.html?id=${tw[1]}&theme=light&lang=id`;
   return null;
 }
 
 function FeaturedPreview({ item, channel }) {
   const embed = embedUrl(item.url);
   const [embedFailed, setEmbedFailed] = useState(false);
+  const isX = Boolean(item.url && item.url.match(/(?:twitter|x)\.com/));
 
   if (embed && !embedFailed) {
     return (
-      <div className="relative mx-5 overflow-hidden border border-slate-200 bg-slate-100" data-testid={`channel-preview-${channel.id}`}>
-        <div className="aspect-[4/5] w-full sm:aspect-[16/10]">
-          <iframe
-            src={embed}
-            title={item.title}
-            className="h-full w-full"
-            frameBorder="0"
-            scrolling="no"
-            allow="encrypted-media; picture-in-picture"
-            onError={() => setEmbedFailed(true)}
+      <div className="relative mx-5 overflow-hidden border border-slate-200 bg-white" data-testid={`channel-preview-${channel.id}`}>
+        {isX ? (
+          <a
+            href={item.url || channel.url || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group/preview relative block"
+          >
+            {item.image_url && (
+              <img
+                src={item.image_url}
+                alt={item.title}
+                loading="lazy"
+                className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover/preview:scale-105"
+              />
+            )}
+            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-white/20 backdrop-blur-sm">
+                  <Twitter size={14} className="text-white" />
+                </span>
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-white/90">
+                  {channel.handle}
+                </span>
+              </div>
+              <p className="font-serif text-base font-bold leading-snug text-white">{item.title}</p>
+              <p className="mt-1 text-[10px] font-mono uppercase tracking-wider text-slate-300">
+                {item.date} · {item.stats}
+              </p>
+            </div>
+            <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center border border-white/40 bg-slate-950/50 text-white backdrop-blur-sm transition-colors group-hover/preview:bg-red-700">
+              <ExternalLink size={14} />
+            </span>
+          </a>
+        ) : (
+          <div className="aspect-[4/5] w-full sm:aspect-[16/10]">
+            <iframe
+              src={embed}
+              title={item.title}
+              className="h-full w-full"
+              frameBorder="0"
+              scrolling="no"
+              allow="encrypted-media; picture-in-picture"
+              onError={() => setEmbedFailed(true)}
+            />
+          </div>
+        )}
+        {!isX && (
+          <a
+            href={item.url || channel.url || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute inset-0"
+            aria-label={`Buka konten ${item.title}`}
           />
-        </div>
-        <a
-          href={item.url || channel.url || "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute inset-0"
-          aria-label={`Buka konten ${item.title}`}
-        />
+        )}
       </div>
     );
   }
