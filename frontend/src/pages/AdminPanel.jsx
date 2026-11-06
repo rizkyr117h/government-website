@@ -121,6 +121,20 @@ export default function AdminPanel() {
     toast.success("Kanal dihapus.");
   };
 
+  const setChannelContent = (items) => setEditingChannel((ec) => ({ ...ec, content: items }));
+
+  const updateContentItem = (idx, field, value) => {
+    const items = [...(editingChannel.content || [])];
+    items[idx] = { ...items[idx], [field]: value };
+    setChannelContent(items);
+  };
+
+  const addContentItem = () =>
+    setChannelContent([...(editingChannel.content || []), { title: "", type: "Video", date: "", stats: "", url: "", image_url: "" }]);
+
+  const removeContentItem = (idx) =>
+    setChannelContent((editingChannel.content || []).filter((_, j) => j !== idx));
+
   const TABS = [
     ["artikel", "Artikel", Newspaper],
     ["komentar", "Komentar", MessageSquare],
@@ -330,6 +344,49 @@ export default function AdminPanel() {
                   <div className="sm:col-span-2">
                     <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Fokus Konten</label>
                     <textarea rows={2} value={editingChannel.focus} onChange={(e) => setEditingChannel({ ...editingChannel, focus: e.target.value })} data-testid="channel-focus-input" className={inputCls} />
+                  </div>
+                </div>
+
+                <div className="mt-6 border-t border-slate-200 pt-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-600">Konten Unggulan ({(editingChannel.content || []).length})</p>
+                      <p className="mt-0.5 text-[11px] text-slate-400">Konten pertama menjadi preview besar di kartu kanal.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addContentItem}
+                      data-testid="content-add-button"
+                      className="flex items-center gap-1.5 border border-slate-300 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-600 transition-colors hover:border-slate-900 hover:text-slate-900"
+                    >
+                      <Plus size={13} /> Tambah Konten
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {(editingChannel.content || []).map((item, idx) => (
+                      <div key={idx} className="border border-slate-200 bg-[#FAF8F5] p-4" data-testid={`content-item-${idx}`}>
+                        <div className="mb-3 flex items-center justify-between">
+                          <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Konten #{idx + 1}{idx === 0 ? " — preview utama" : ""}</p>
+                          <button type="button" onClick={() => removeContentItem(idx)} data-testid={`content-remove-${idx}`} className="text-slate-400 hover:text-red-700" aria-label="Hapus konten">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div className="sm:col-span-2">
+                            <input value={item.title} onChange={(e) => updateContentItem(idx, "title", e.target.value)} placeholder="Judul konten" data-testid={`content-title-${idx}`} className={inputCls} />
+                          </div>
+                          <select value={item.type} onChange={(e) => updateContentItem(idx, "type", e.target.value)} data-testid={`content-type-${idx}`} className={inputCls}>
+                            {["Video", "Reels", "Post", "Utas", "Infografis", "Dokumenter", "Catatan"].map((t) => <option key={t}>{t}</option>)}
+                          </select>
+                          <input value={item.date} onChange={(e) => updateContentItem(idx, "date", e.target.value)} placeholder="Tanggal (mis. Feb 2025)" data-testid={`content-date-${idx}`} className={inputCls} />
+                          <input value={item.stats} onChange={(e) => updateContentItem(idx, "stats", e.target.value)} placeholder="Statistik (mis. 2,3 jt tayangan)" data-testid={`content-stats-${idx}`} className={inputCls} />
+                          <input value={item.url} onChange={(e) => updateContentItem(idx, "url", e.target.value)} placeholder="URL konten" data-testid={`content-url-${idx}`} className={inputCls} />
+                          <div className="sm:col-span-2">
+                            <input value={item.image_url} onChange={(e) => updateContentItem(idx, "image_url", e.target.value)} placeholder="URL gambar preview (opsional)" data-testid={`content-image-${idx}`} className={inputCls} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
                 <button

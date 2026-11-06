@@ -797,37 +797,87 @@ SEED_RANKINGS = [
     },
 ]
 
+IMG = [
+    "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "https://images.unsplash.com/photo-1756142507999-ea5301f4350a?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+]
+
 SEED_CHANNELS = [
     {"name": "Geolive", "handle": "@geolive.id", "platform": "YouTube", "followers": "2,1 jt",
      "focus": "Video esai kritis yang membedah kebijakan pemerintah dengan data — dari Danantara hingga efisiensi anggaran.",
-     "url": "https://www.youtube.com/@GeoliveID"},
+     "url": "https://www.youtube.com/@GeoliveID",
+     "content": [
+         {"title": "Danantara: Bank Keluarga atau Bank Negara?", "type": "Video", "date": "Feb 2025", "stats": "2,3 jt tayangan", "url": "https://www.youtube.com/@GeoliveID", "image_url": IMG[4]},
+         {"title": "Kenapa Efisiensi Anggaran Bikin Rakyat Kena Getahnya?", "type": "Video", "date": "Mar 2025", "stats": "1,8 jt tayangan", "url": "https://www.youtube.com/@GeoliveID", "image_url": IMG[5]},
+         {"title": "Makan Gratis Rp 171 Triliun: Dari Mana Uangnya?", "type": "Video", "date": "Apr 2025", "stats": "1,5 jt tayangan", "url": "https://www.youtube.com/@GeoliveID", "image_url": IMG[0]},
+     ]},
     {"name": "Kok Bisa?", "handle": "@kokbisa", "platform": "YouTube", "followers": "4,4 jt",
      "focus": "Animasi edukasi yang menjawab pertanyaan publik soal isu politik dan sosial yang sedang ramai.",
-     "url": "https://www.youtube.com/@KokBisa"},
+     "url": "https://www.youtube.com/@KokBisa",
+     "content": [
+         {"title": "Kenapa Korupsi di Indonesia Susah Hilang?", "type": "Video", "date": "Jan 2025", "stats": "3,1 jt tayangan", "url": "https://www.youtube.com/@KokBisa", "image_url": IMG[5]},
+         {"title": "Apa Itu Dinasti Politik dan Kenapa Berbahaya?", "type": "Video", "date": "Nov 2024", "stats": "2,4 jt tayangan", "url": "https://www.youtube.com/@KokBisa", "image_url": IMG[3]},
+     ]},
     {"name": "Najwa Shihab / Narasi", "handle": "@narasi.tv", "platform": "YouTube", "followers": "12 jt",
      "focus": "Jurnalisme investigasi dan wawancara tanpa tedeng aling — 'Mata Najwa' legendaris kini versi digital.",
-     "url": "https://www.youtube.com/@NajwaShihab"},
+     "url": "https://www.youtube.com/@NajwaShihab",
+     "content": [
+         {"title": "Catatan Najwa: Kabinet Gemuk dan Ongkos Politiknya", "type": "Video", "date": "Okt 2024", "stats": "4,7 jt tayangan", "url": "https://www.youtube.com/@NajwaShihab", "image_url": IMG[0]},
+         {"title": "Mata Najwa: Siapa yang Untung dari IKN?", "type": "Video", "date": "Agu 2024", "stats": "5,2 jt tayangan", "url": "https://www.youtube.com/@NajwaShihab", "image_url": IMG[1]},
+         {"title": "Peringatan Darurat: Ketika DPR Melawan MK", "type": "Video", "date": "Agu 2024", "stats": "6,8 jt tayangan", "url": "https://www.youtube.com/@NajwaShihab", "image_url": IMG[2]},
+     ]},
     {"name": "Tirta Pengkiri Pambudi", "handle": "@tirtapengkiri", "platform": "Instagram", "followers": "3,2 jt",
      "focus": "Dokter dan influencer yang vokal mengkritik kebijakan kesehatan dan anggaran pemerintah.",
-     "url": "https://www.instagram.com/tirtapengkiri"},
+     "url": "https://www.instagram.com/tirtapengkiri",
+     "content": [
+         {"title": "Membedah Anggaran Makan Gratis Rp 171 T", "type": "Reels", "date": "Feb 2025", "stats": "5,4 jt tayangan", "url": "https://www.instagram.com/tirtapengkiri", "image_url": IMG[3]},
+         {"title": "Ketika APBN Dipangkas, Siapa yang Menangis?", "type": "Reels", "date": "Mar 2025", "stats": "3,9 jt tayangan", "url": "https://www.instagram.com/tirtapengkiri", "image_url": IMG[2]},
+     ]},
     {"name": "Fahri Hamzah", "handle": "@fahrihamzah", "platform": "X", "followers": "1,6 jt",
      "focus": "Mantan wakil ketua DPR yang kerap mengkritik pemerintah lewat utas panjang penuh amarah.",
-     "url": "https://x.com/fahrihamzah"},
+     "url": "https://x.com/fahrihamzah",
+     "content": [
+         {"title": "Utas: Republik Tanpa Oposisi adalah Republik yang Tidur", "type": "Utas", "date": "Jan 2025", "stats": "8,2 rb repost", "url": "https://x.com/fahrihamzah", "image_url": IMG[1]},
+         {"title": "Utas: Bahaya Danantara yang Lepas dari Audit", "type": "Utas", "date": "Feb 2025", "stats": "6,5 rb repost", "url": "https://x.com/fahrihamzah", "image_url": IMG[4]},
+     ]},
     {"name": "Pijaru", "handle": "@pijaru", "platform": "Instagram", "followers": "2,8 jt",
      "focus": "Konten infografis dan video singkat yang menyederhanakan isu politik rumit untuk anak muda.",
-     "url": "https://www.instagram.com/pijaru"},
+     "url": "https://www.instagram.com/pijaru",
+     "content": [
+         {"title": "Infografis: Peta Dinasti Politik di Pilkada 2024", "type": "Infografis", "date": "Nov 2024", "stats": "2,1 jt like", "url": "https://www.instagram.com/pijaru", "image_url": IMG[3]},
+         {"title": "RUU Pilkada dalam 60 Detik", "type": "Reels", "date": "Agu 2024", "stats": "7,3 jt tayangan", "url": "https://www.instagram.com/pijaru", "image_url": IMG[0]},
+     ]},
     {"name": "Fadil Jaidi", "handle": "@fadiljaidi", "platform": "TikTok", "followers": "12 jt",
      "focus": "Meski dikenal komedi, konten spontannya beberapa kali menyentil isu sosial-politik hingga viral.",
-     "url": "https://www.tiktok.com/@fadiljaidi"},
+     "url": "https://www.tiktok.com/@fadiljaidi",
+     "content": [
+         {"title": "Pak Mie dan Kenaikan Harga Sembako", "type": "Video", "date": "Des 2024", "stats": "21 jt tayangan", "url": "https://www.tiktok.com/@fadiljaidi", "image_url": IMG[2]},
+     ]},
     {"name": "Watchdoc Documentary", "handle": "@watchdoc", "platform": "YouTube", "followers": "1,4 jt",
      "focus": "Rumah produksi dokumenter investigasi — 'Sexy Killers' dan 'Dandhy Laksono' tentang oligarki tambang.",
-     "url": "https://www.youtube.com/@WatchdocDocumentary"},
+     "url": "https://www.youtube.com/@WatchdocDocumentary",
+     "content": [
+         {"title": "Sexy Killers: Oligarki Tambang di Balik Energi Kita", "type": "Dokumenter", "date": "2019 — masih relevan", "stats": "38 jt tayangan", "url": "https://www.youtube.com/@WatchdocDocumentary", "image_url": IMG[1]},
+         {"title": "Ekspedisi Indonesia Biru", "type": "Dokumenter", "date": "2022", "stats": "3,4 jt tayangan", "url": "https://www.youtube.com/@WatchdocDocumentary", "image_url": IMG[0]},
+     ]},
     {"name": "Project Multatuli", "handle": "@projectmultatuli", "platform": "Instagram", "followers": "1,1 jt",
      "focus": "Media kolektif yang memberitakan masyarakat pinggiran dan korban kebijakan — 'melayani yang tak dilayani'.",
-     "url": "https://www.instagram.com/projectmultatuli"},
+     "url": "https://www.instagram.com/projectmultatuli",
+     "content": [
+         {"title": "Serial #PercumaLaporPolisi", "type": "Post", "date": "Berkelanjutan", "stats": "1,9 jt like", "url": "https://www.instagram.com/projectmultatuli", "image_url": IMG[4]},
+         {"title": "Korban Kebijakan: Honorer yang Dirumahkan Efisiensi", "type": "Post", "date": "Mar 2025", "stats": "890 rb like", "url": "https://www.instagram.com/projectmultatuli", "image_url": IMG[5]},
+     ]},
     {"name": "Eko Kuntadhi", "handle": "@ekokuntadhi", "platform": "Facebook", "followers": "900 rb",
      "focus": "Komentator politik senior dengan tulisan tajam tentang kekuasaan dan demokrasi.",
-     "url": "https://www.facebook.com/ekokuntadhi"},
+     "url": "https://www.facebook.com/ekokuntadhi",
+     "content": [
+         {"title": "Catatan: Demokrasi Cacat yang Kita Pelihara", "type": "Catatan", "date": "Jan 2025", "stats": "410 rb dibagikan", "url": "https://www.facebook.com/ekokuntadhi", "image_url": IMG[5]},
+         {"title": "Catatan: Ketika Buzzer Menjadi Mesin Negara", "type": "Catatan", "date": "Feb 2025", "stats": "280 rb dibagikan", "url": "https://www.facebook.com/ekokuntadhi", "image_url": IMG[1]},
+     ]},
 ]
 
 
@@ -872,8 +922,15 @@ async def seed_data():
             {"$set": set_fields, "$setOnInsert": insert_fields},
             upsert=True,
         )
-    if await db.channels.count_documents({}) == 0:
-        await db.channels.insert_many([{**c, "id": uuid.uuid4().hex} for c in SEED_CHANNELS])
+    for c in SEED_CHANNELS:
+        seed_doc = {**c, "id": uuid.uuid4().hex}
+        result = await db.channels.update_one({"name": c["name"]}, {"$setOnInsert": seed_doc}, upsert=True)
+        if result.upserted_id is None:
+            # kanal sudah ada: hanya isi konten bila belum ada (jangan menimpa hasil edit admin)
+            await db.channels.update_one(
+                {"name": c["name"], "content": {"$exists": False}},
+                {"$set": {"content": c["content"]}},
+            )
 
 
 @api_router.get("/")

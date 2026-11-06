@@ -36,6 +36,14 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 - Edisi Mingguan: GET /api/edisi-mingguan → halaman HTML print-ready A4 (masthead, 6 liputan terbaru, tabel arsip skandal + rapor peringkat) yang otomatis membuka dialog cetak (Simpan sebagai PDF). Tautan di header ("Edisi Mingguan") dan footer.
 - Konten Sosial: rubrik "Konten yang Memberitakan Kabar Buruk" — kurasi 10 kanal/influencer (Geolive, Kok Bisa, Najwa Shihab/Narasi, Tirta, Fahri Hamzah, Pijaru, Fadil Jaidi, Watchdoc, Project Multatuli, Eko Kuntadhi) dengan filter platform (Instagram/YouTube/Facebook/TikTok/X). Admin tab "Kanal Sosial" untuk CRUD kurasi.
 
+## Implemented (2026-11-06, ronde 4)
+- Preview konten sosial: tiap kanal kini menampilkan preview thumbnail besar (konten unggulan) + daftar konten pilihan (judul, jenis konten, tanggal, statistik tayangan, tautan). Tipe konten: Video, Reels, Post, Utas, Infografis, Dokumenter, Catatan.
+- Admin tab "Kanal Sosial" kini bisa mengelola daftar konten per kanal (tambah/hapus/edit judul, tipe, tanggal, statistik, URL, gambar preview). Konten pertama otomatis jadi preview utama.
+
+## Verified (ronde 4)
+- curl: /api/channels (10 kanal, konten terisi lewat seed upsert non-destruktif).
+- Screenshots: kartu kanal dengan preview besar + daftar konten (Geolive 3 konten), filter YouTube, mobile 375px.
+
 ## Verified (ronde 3)
 - curl: /api/channels (10), /api/edisi-mingguan 200 OK 10.4KB HTML.
 - Screenshots: badge MEMBURUK pada Kebebasan Pers & Indeks Demokrasi, grid kanal sosial, filter YouTube (4 kanal), halaman edisi mingguan print-ready, mobile 375px.
