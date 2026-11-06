@@ -46,6 +46,12 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 ## Implemented (2026-11-06, ronde 6)
 - Kurasi konten sosial diperbarui dengan konten nyata terverifikasi web: Najwa Shihab "Presiden Prabowo Menjawab" (youtube.com/watch?v=-WLpXmnBmxo + thumbnail asli), Watchdoc "Sexy Killers" (youtube.com/watch?v=qlB7vg4I-To + thumbnail asli), Pijaru infografis dinasti politik (instagram.com/p/CydhAlcPlaE/), dr. Tirta kritik insentif MBG Rp 1 T, Geolive POLITIK series, Kok Bisa? video korupsi & rupiah klasik. Seed channels kini upsert konten tanpa menimpa edit admin.
 
+## Implemented (2026-11-06, ronde 7)
+- Fix thumbnail view: mengganti semua URL CDN Instagram/Facebook/TikTok yang kedaluwarsa/diblokir hotlink dengan URL stabil Unsplash/Pexels; YouTube tetap memakai img.youtube.com/vi/<id>/hqdefault.jpg (resmi & stabil).
+
+## Verified (ronde 7) — oleh troubleshoot_agent
+- Semua filter platform (Semua, Instagram, YouTube, Facebook, TikTok) menampilkan thumbnail dengan benar; 0 URL CDN sosial yang bermasalah tersisa.
+
 ## Verified (ronde 6)
 - curl: /api/channels menampilkan konten baru.
 - Screenshots: preview Najwa menampilkan thumbnail asli wawancara Prabowo, Geolive preview "Prabowo Hemat Rp 750 Triliun" dari thumbnail YouTube asli; href preview mengarah ke video YouTube sebenarnya.
