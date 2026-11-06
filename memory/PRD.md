@@ -40,6 +40,12 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 - Preview konten sosial: tiap kanal kini menampilkan preview thumbnail besar (konten unggulan) + daftar konten pilihan (judul, jenis konten, tanggal, statistik tayangan, tautan). Tipe konten: Video, Reels, Post, Utas, Infografis, Dokumenter, Catatan.
 - Admin tab "Kanal Sosial" kini bisa mengelola daftar konten per kanal (tambah/hapus/edit judul, tipe, tanggal, statistik, URL, gambar preview). Konten pertama otomatis jadi preview utama.
 
+## Implemented (2026-11-06, ronde 5)
+- Gambar nyata konten: editor konten admin kini menampilkan preview thumbnail langsung, kolom tempel URL gambar asli, dan tombol "Ambil thumbnail asli dari URL YouTube" (mengekstrak ID video dari URL watch/shorts/embed/youtu.be → img.youtube.com/vi/<id>/hqdefault.jpg).
+
+## Verified (ronde 5)
+- Screenshots: login admin → tab Kanal Sosial → sunting Geolive → tempel URL YouTube → tombol auto-thumbnail muncul dan mengisi https://img.youtube.com/vi/.../hqdefault.jpg dengan preview gambar asli tampil di editor (URL uji tidak disimpan).
+
 ## Verified (ronde 4)
 - curl: /api/channels (10 kanal, konten terisi lewat seed upsert non-destruktif).
 - Screenshots: kartu kanal dengan preview besar + daftar konten (Geolive 3 konten), filter YouTube, mobile 375px.

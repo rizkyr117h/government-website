@@ -135,6 +135,12 @@ export default function AdminPanel() {
   const removeContentItem = (idx) =>
     setChannelContent((editingChannel.content || []).filter((_, j) => j !== idx));
 
+  const youtubeThumb = (url) => {
+    if (!url) return null;
+    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{6,})/);
+    return m ? `https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` : null;
+  };
+
   const TABS = [
     ["artikel", "Artikel", Newspaper],
     ["komentar", "Komentar", MessageSquare],
@@ -382,7 +388,31 @@ export default function AdminPanel() {
                           <input value={item.stats} onChange={(e) => updateContentItem(idx, "stats", e.target.value)} placeholder="Statistik (mis. 2,3 jt tayangan)" data-testid={`content-stats-${idx}`} className={inputCls} />
                           <input value={item.url} onChange={(e) => updateContentItem(idx, "url", e.target.value)} placeholder="URL konten" data-testid={`content-url-${idx}`} className={inputCls} />
                           <div className="sm:col-span-2">
-                            <input value={item.image_url} onChange={(e) => updateContentItem(idx, "image_url", e.target.value)} placeholder="URL gambar preview (opsional)" data-testid={`content-image-${idx}`} className={inputCls} />
+                            <div className="flex items-start gap-3">
+                              <div className="grid h-16 w-28 shrink-0 place-items-center overflow-hidden border border-slate-200 bg-slate-100" data-testid={`content-thumb-preview-${idx}`}>
+                                {item.image_url ? (
+                                  <img key={item.image_url} src={item.image_url} alt="preview" className="h-full w-full object-cover" />
+                                ) : (
+                                  <span className="px-1 text-center font-mono text-[9px] uppercase tracking-wider text-slate-400">tanpa gambar</span>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <input value={item.image_url} onChange={(e) => updateContentItem(idx, "image_url", e.target.value)} placeholder="Tempel URL gambar thumbnail asli konten (opsional)" data-testid={`content-image-${idx}`} className={inputCls} />
+                                {youtubeThumb(item.url) && youtubeThumb(item.url) !== item.image_url && (
+                                  <button
+                                    type="button"
+                                    onClick={() => updateContentItem(idx, "image_url", youtubeThumb(item.url))}
+                                    data-testid={`content-thumb-auto-${idx}`}
+                                    className="mt-1.5 border border-red-300 bg-red-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-red-700 transition-colors hover:bg-red-100"
+                                  >
+                                    Ambil thumbnail asli dari URL YouTube
+                                  </button>
+                                )}
+                                <p className="mt-1 text-[10px] leading-relaxed text-slate-400">
+                                  Untuk YouTube, tombol di atas mengisi thumbnail video asli secara otomatis. Untuk platform lain, klik kanan gambar kontennya → "Salin alamat gambar".
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
