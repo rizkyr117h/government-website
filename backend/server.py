@@ -809,33 +809,32 @@ IMG = [
 SEED_CHANNELS = [
     {"name": "Geolive", "handle": "@geolive.id", "platform": "YouTube", "followers": "2,1 jt",
      "focus": "Video esai kritis yang membedah kebijakan pemerintah dengan data — dari Danantara hingga efisiensi anggaran.",
-     "url": "https://www.youtube.com/@GeoliveID",
+     "url": "https://www.youtube.com/@GEOLIVEindonesia",
      "content": [
-         {"title": "Danantara: Bank Keluarga atau Bank Negara?", "type": "Video", "date": "Feb 2025", "stats": "2,3 jt tayangan", "url": "https://www.youtube.com/@GeoliveID", "image_url": IMG[4]},
-         {"title": "Kenapa Efisiensi Anggaran Bikin Rakyat Kena Getahnya?", "type": "Video", "date": "Mar 2025", "stats": "1,8 jt tayangan", "url": "https://www.youtube.com/@GeoliveID", "image_url": IMG[5]},
-         {"title": "Makan Gratis Rp 171 Triliun: Dari Mana Uangnya?", "type": "Video", "date": "Apr 2025", "stats": "1,5 jt tayangan", "url": "https://www.youtube.com/@GeoliveID", "image_url": IMG[0]},
+         {"title": "Efisiensi Anggaran Rp 750 T: Untuk MBG atau Modal Danantara?", "type": "Video", "date": "Feb 2025", "stats": "1,2 jt tayangan", "url": "https://www.youtube.com/@GEOLIVEindonesia", "image_url": "https://img.youtube.com/vi/_o_get6BEcs/hqdefault.jpg"},
+         {"title": "POLITIK | Banser Melawan HTI (ft. Akhmad Sahal)", "type": "Video", "date": "2024", "stats": "890 rb tayangan", "url": "https://www.youtube.com/@GEOLIVEindonesia", "image_url": IMG[3]},
+         {"title": "POLITIK | PKS Mau Bangun Negara Islam?", "type": "Video", "date": "2024", "stats": "760 rb tayangan", "url": "https://www.youtube.com/@GEOLIVEindonesia", "image_url": IMG[1]},
      ]},
     {"name": "Kok Bisa?", "handle": "@kokbisa", "platform": "YouTube", "followers": "4,4 jt",
      "focus": "Animasi edukasi yang menjawab pertanyaan publik soal isu politik dan sosial yang sedang ramai.",
      "url": "https://www.youtube.com/@KokBisa",
      "content": [
-         {"title": "Kenapa Korupsi di Indonesia Susah Hilang?", "type": "Video", "date": "Jan 2025", "stats": "3,1 jt tayangan", "url": "https://www.youtube.com/@KokBisa", "image_url": IMG[5]},
-         {"title": "Apa Itu Dinasti Politik dan Kenapa Berbahaya?", "type": "Video", "date": "Nov 2024", "stats": "2,4 jt tayangan", "url": "https://www.youtube.com/@KokBisa", "image_url": IMG[3]},
+         {"title": "Kenapa Korupsi di Indonesia Susah Hilang?", "type": "Video", "date": "2024", "stats": "3,1 jt tayangan", "url": "https://www.youtube.com/@KokBisa", "image_url": IMG[5]},
+         {"title": "Kenapa Rupiah Bisa Melemah? (Video Viral Perdana)", "type": "Video", "date": "2015 — klasik", "stats": "2,7 jt tayangan", "url": "https://www.youtube.com/@KokBisa", "image_url": IMG[4]},
      ]},
     {"name": "Najwa Shihab / Narasi", "handle": "@narasi.tv", "platform": "YouTube", "followers": "12 jt",
      "focus": "Jurnalisme investigasi dan wawancara tanpa tedeng aling — 'Mata Najwa' legendaris kini versi digital.",
      "url": "https://www.youtube.com/@NajwaShihab",
      "content": [
-         {"title": "Catatan Najwa: Kabinet Gemuk dan Ongkos Politiknya", "type": "Video", "date": "Okt 2024", "stats": "4,7 jt tayangan", "url": "https://www.youtube.com/@NajwaShihab", "image_url": IMG[0]},
-         {"title": "Mata Najwa: Siapa yang Untung dari IKN?", "type": "Video", "date": "Agu 2024", "stats": "5,2 jt tayangan", "url": "https://www.youtube.com/@NajwaShihab", "image_url": IMG[1]},
+         {"title": "Presiden Prabowo Menjawab (Efisiensi Anggaran & 'Indonesia Gelap')", "type": "Video", "date": "Apr 2025", "stats": "3 jam 26 menit — 4,1 jt tayangan", "url": "https://www.youtube.com/watch?v=-WLpXmnBmxo", "image_url": "https://img.youtube.com/vi/-WLpXmnBmxo/hqdefault.jpg"},
          {"title": "Peringatan Darurat: Ketika DPR Melawan MK", "type": "Video", "date": "Agu 2024", "stats": "6,8 jt tayangan", "url": "https://www.youtube.com/@NajwaShihab", "image_url": IMG[2]},
      ]},
     {"name": "Tirta Pengkiri Pambudi", "handle": "@tirtapengkiri", "platform": "Instagram", "followers": "3,2 jt",
      "focus": "Dokter dan influencer yang vokal mengkritik kebijakan kesehatan dan anggaran pemerintah.",
      "url": "https://www.instagram.com/tirtapengkiri",
      "content": [
-         {"title": "Membedah Anggaran Makan Gratis Rp 171 T", "type": "Reels", "date": "Feb 2025", "stats": "5,4 jt tayangan", "url": "https://www.instagram.com/tirtapengkiri", "image_url": IMG[3]},
-         {"title": "Ketika APBN Dipangkas, Siapa yang Menangis?", "type": "Reels", "date": "Mar 2025", "stats": "3,9 jt tayangan", "url": "https://www.instagram.com/tirtapengkiri", "image_url": IMG[2]},
+         {"title": "Kritik Insentif MBG Rp 1 Triliun (di-DM 2 Wamen setelah viral)", "type": "Live", "date": "Nov 2026", "stats": "viral nasional", "url": "https://www.instagram.com/tirtapengkiri", "image_url": IMG[3]},
+         {"title": "Soroti Nasib Kelas Menengah: Pajak Ditarik, Manfaat Tak Terasa", "type": "Reels", "date": "2025", "stats": "3,9 jt tayangan", "url": "https://www.instagram.com/tirtapengkiri", "image_url": IMG[2]},
      ]},
     {"name": "Fahri Hamzah", "handle": "@fahrihamzah", "platform": "X", "followers": "1,6 jt",
      "focus": "Mantan wakil ketua DPR yang kerap mengkritik pemerintah lewat utas panjang penuh amarah.",
@@ -848,7 +847,7 @@ SEED_CHANNELS = [
      "focus": "Konten infografis dan video singkat yang menyederhanakan isu politik rumit untuk anak muda.",
      "url": "https://www.instagram.com/pijaru",
      "content": [
-         {"title": "Infografis: Peta Dinasti Politik di Pilkada 2024", "type": "Infografis", "date": "Nov 2024", "stats": "2,1 jt like", "url": "https://www.instagram.com/pijaru", "image_url": IMG[3]},
+         {"title": "Infografis: Dinasti Politik dan Kepemimpinan Kekerabatan", "type": "Infografis", "date": "Okt 2023", "stats": "120 rb like", "url": "https://www.instagram.com/p/CydhAlcPlaE/", "image_url": IMG[3]},
          {"title": "RUU Pilkada dalam 60 Detik", "type": "Reels", "date": "Agu 2024", "stats": "7,3 jt tayangan", "url": "https://www.instagram.com/pijaru", "image_url": IMG[0]},
      ]},
     {"name": "Fadil Jaidi", "handle": "@fadiljaidi", "platform": "TikTok", "followers": "12 jt",
@@ -861,8 +860,8 @@ SEED_CHANNELS = [
      "focus": "Rumah produksi dokumenter investigasi — 'Sexy Killers' dan 'Dandhy Laksono' tentang oligarki tambang.",
      "url": "https://www.youtube.com/@WatchdocDocumentary",
      "content": [
-         {"title": "Sexy Killers: Oligarki Tambang di Balik Energi Kita", "type": "Dokumenter", "date": "2019 — masih relevan", "stats": "38 jt tayangan", "url": "https://www.youtube.com/@WatchdocDocumentary", "image_url": IMG[1]},
-         {"title": "Ekspedisi Indonesia Biru", "type": "Dokumenter", "date": "2022", "stats": "3,4 jt tayangan", "url": "https://www.youtube.com/@WatchdocDocumentary", "image_url": IMG[0]},
+         {"title": "Sexy Killers: Oligarki Tambang di Balik Energi Kita", "type": "Dokumenter", "date": "14 Apr 2019 — masih relevan", "stats": "38 jt tayangan", "url": "https://www.youtube.com/watch?v=qlB7vg4I-To", "image_url": "https://img.youtube.com/vi/qlB7vg4I-To/hqdefault.jpg"},
+         {"title": "Ekspedisi Indonesia Biru (Full Series)", "type": "Dokumenter", "date": "2015–2019", "stats": "3,4 jt tayangan", "url": "https://www.youtube.com/@WatchdocDocumentary", "image_url": IMG[0]},
      ]},
     {"name": "Project Multatuli", "handle": "@projectmultatuli", "platform": "Instagram", "followers": "1,1 jt",
      "focus": "Media kolektif yang memberitakan masyarakat pinggiran dan korban kebijakan — 'melayani yang tak dilayani'.",
@@ -926,10 +925,14 @@ async def seed_data():
         seed_doc = {**c, "id": uuid.uuid4().hex}
         result = await db.channels.update_one({"name": c["name"]}, {"$setOnInsert": seed_doc}, upsert=True)
         if result.upserted_id is None:
-            # kanal sudah ada: hanya isi konten bila belum ada (jangan menimpa hasil edit admin)
+            # kanal sudah ada: hanya isi konten bila belum ada, belum berisi URL konten asli, atau masih kosong
             await db.channels.update_one(
-                {"name": c["name"], "content": {"$exists": False}},
-                {"$set": {"content": c["content"]}},
+                {"name": c["name"], "$or": [
+                    {"content": {"$exists": False}},
+                    {"content": []},
+                    {"content.url": "https://www.youtube.com/@GeoliveID"},  # seed lama sebelum pembaruan konten nyata
+                ]},
+                {"$set": {"content": c["content"], "url": c["url"]}},
             )
 
 
