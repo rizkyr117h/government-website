@@ -1,0 +1,9 @@
+crons:
+  - name: scrape-news
+    description: "Scraping berita politik dari Kompas, Detik, Tempo, CNN Indonesia, dan Tribun setiap 6 jam"
+    cron: "0 */6 * * *"
+    timezone: "Asia/Jakarta"
+    endpoint: "{{BASE_URL}}/api/cron/scrape-news"
+    method: POST
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    enabled: true

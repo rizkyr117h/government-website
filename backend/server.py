@@ -7,8 +7,10 @@ from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlparse
 
 import bcrypt
+import feedparser
 import jwt
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query, Request, Response
@@ -336,12 +338,12 @@ async def update_ranking(key: str, input: RankingInput, user=Depends(get_current
     return await db.rankings.find_one({"key": key}, {"_id": 0})
 
 
-# ---------------- Social Channels (kurasi konten media sosial) ----------------
+# ---------------- Social Channels ----------------
 
 class ChannelInput(BaseModel):
     name: str
     handle: str
-    platform: str  # Instagram | YouTube | Facebook | TikTok | X
+    platform: str
     followers: str = ""
     focus: str = ""
     url: str = ""
@@ -373,7 +375,94 @@ async def delete_channel(channel_id: str, user=Depends(get_current_user)):
     return {"ok": True}
 
 
-# ---------------- Edisi Mingguan (PDF-ready print page) ----------------
+# ---------------- News Scraper ----------------
+
+PORTALS = [
+    {"name": "Kompas", "rss": "https://www.kompas.com/rss", "category": "Politik"},
+    {"name": "Detik", "rss": "https://rss.detik.com/index.php/detikcom", "category": "Politik"},
+    {"name": "Tempo", "rss": "https://rss.tempo.co/nasional", "category": "Politik"},
+    {"name": "CNN Indonesia", "rss": "https://www.cnnindonesia.com/nasional/rss", "category": "Politik"},
+    {"name": "Tribun", "rss": "https://www.tribunnews.com/rss", "category": "Politik"},
+]
+
+KEYWORDS = [
+    "korupsi", "skandal", "Prabowo", "Gibran", "DPR", "Menteri", "KPK",
+    "pajak", "anggaran", "APBN", "demonstrasi", "kontroversi", "reshuffle",
+    "Danantara", "IKN", "Makan Bergizi", "kebebasan pers", "dinasti politik",
+]
+
+# Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+@api_router.post("/cron/scrape-news")
+async def cron_scrape_news(request: Request):
+    auth = request.headers.get("Authorization", "")
+    expected = os.environ.get("WEBHOOK_CRON_SECRET")
+    if not expected or not auth.startswith("Bearer ") or auth[7:] != expected:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    run_id = request.headers.get("X-Webhook-Id", uuid.uuid4().hex)
+    asyncio.create_task(scrape_news())
+    return {"ok": True, "run_id": run_id, "message": "Scraping queued"}
+
+
+async def scrape_news():
+    logger = logging.getLogger(__name__)
+    total_new = 0
+    for portal in PORTALS:
+        try:
+            feed = feedparser.parse(portal["rss"])
+            for entry in feed.entries[:20]:
+                title = entry.get("title", "")
+                link = entry.get("link", "")
+                summary = entry.get("summary", "")[:300]
+                published = entry.get("published_parsed")
+                if not title or not link:
+                    continue
+                # Cek keyword
+                text = (title + " " + summary).lower()
+                if not any(k.lower() in text for k in KEYWORDS):
+                    continue
+                # Cek duplikat by link
+                exists = await db.articles.find_one({"source_url": link})
+                if exists:
+                    continue
+                # Parse tanggal
+                if published:
+                    pub_date = datetime(*published[:6], tzinfo=timezone.utc).isoformat()
+                else:
+                    pub_date = datetime.now(timezone.utc).isoformat()
+                # Ambil gambar OG kalau ada
+                image_url = ""
+                if "media_content" in entry and entry.media_content:
+                    image_url = entry.media_content[0].get("url", "")
+                elif "links" in entry:
+                    for l in entry.links:
+                        if l.get("type", "").startswith("image"):
+                            image_url = l.get("href", "")
+                            break
+                doc = {
+                    "id": uuid.uuid4().hex,
+                    "slug": slugify(title),
+                    "title": title,
+                    "category": portal["category"],
+                    "severity": "Sedang",
+                    "dek": summary,
+                    "body": summary,
+                    "image_url": image_url,
+                    "author": portal["name"],
+                    "source_url": link,
+                    "source_name": portal["name"],
+                    "published_at": pub_date,
+                    "views": 0,
+                    "reactions": {"marah": 0, "kecewa": 0, "waspada": 0},
+                }
+                await db.articles.insert_one(doc)
+                total_new += 1
+        except Exception as e:
+            logger.error(f"Scrape {portal['name']} failed: {e}")
+    logger.info(f"Scraping done: {total_new} new articles")
+    return total_new
+
+
+# ---------------- Edisi Mingguan ----------------
 
 @api_router.get("/edisi-mingguan", response_class=HTMLResponse)
 async def edisi_mingguan():
@@ -577,83 +666,6 @@ SEED_ARTICLES = [
         "loss_estimate": "Rp 466 T (estimasi total)",
         "reading_time": 6,
     },
-    {
-        "title": "Kabinet Gemuk ala Prabowo: 100+ Kursi Menteri dan Wakil Menteri, Rekor Terbesar Era Reformasi",
-        "category": "Kebijakan",
-        "severity": "Tinggi",
-        "dek": "Presiden Prabowo Subianto membentuk kabinet terbesar sejak reformasi dengan lebih dari seratus menteri, wakil menteri, dan pejabat setingkat. Kritikus menyebutnya politik akomodasi yang membebani APBN.",
-        "body": "Kabinet Merah Putih mencetak rekor: 48 kementerian dengan total lebih dari 100 menteri, wakil menteri, dan pejabat setingkat menteri. Jumlah ini melampaui kabinet era Jokowi maupun pemerintahan sebelumnya, bahkan mendekati praktik era Orde Baru.\n\nPara pengamat menilai gemuknya kabinet bukan soal kebutuhan teknis, melainkan akomodasi politik. Koalisi superbesar yang dibangun membuat hampir semua partai pendukung menuntut jatah kursi. Akibatnya, fungsi kementerian tumpang tindih dan koordinasi justru makin rumit.\n\nIronisnya, di saat yang sama pemerintah menggemakan efisiensi anggaran. Biaya gaji, tunjangan, dan rumah dinas untuk seratus lebih pejabat itu membebani APBN ratusan miliar rupiah per tahun — uang yang bisa dialihkan untuk sekolah atau puskesmas.",
-        "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "author": "Dewi Kartika",
-        "loss_estimate": None,
-        "reading_time": 6,
-    },
-    {
-        "title": "Efisiensi Anggaran Rp 306 Triliun: Pemangkasan Masal dan Layanan Publik yang Tersendat",
-        "category": "Kebijakan",
-        "severity": "Kritis",
-        "dek": "Instruksi presiden memangkas belanja kementerian dan lembaga ratusan triliun rupiah. Honorarium ditahan, perjalanan dinas dibekukan, ribuan pegawai kontrak dirumahkan.",
-        "body": "Lewat instruksi efisiensi anggaran, pemerintahan Prabowo memangkas belanja kementerian dan lembaga hingga lebih dari Rp 300 triliun. Sebagian dialihkan untuk membiayai program prioritas seperti makan bergizi gratis.\n\nDampaknya langsung terasa di akar rumput: ribuan pegawai honorer dan kontrak di berbagai daerah dirumahkan, dana penelitian kampus menyusut, beasiswa terancam, hingga biaya operasional layanan publik dipangkas habis. Di sejumlah kementerian, lampu gedung dimatikan bergantian dan pencetakan dokumen dibatasi.\n\nEkonom mengingatkan bahwa pemangkasan masal tanpa peta jalan yang jelas justru menekan daya beli masyarakat dan memperlambat ekonomi. Yang paling dikritik: minimnya transparansi soal pos apa saja yang dipangkas dan ke mana uangnya benar-benar bermuara.",
-        "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-        "author": "Fajar Nugraha",
-        "loss_estimate": "Rp 306 T (dipangkas)",
-        "reading_time": 6,
-    },
-    {
-        "title": "Makan Bergizi Gratis di Bawah Sorotan: Anggaran Fantastis dan Gelombang Keracunan Massal",
-        "category": "Skandal",
-        "severity": "Kritis",
-        "dek": "Program andalan Prabowo senilai ratusan triliun rupiah per tahun menyasar puluhan juta anak. Alih-alih menjadi lompatan gizi, program ini diwarnai ribuan kasus keracunan dan dapur tak layak.",
-        "body": "Makan Bergizi Gratis diiklankan sebagai warisan terbesar pemerintahan Prabowo: makan siang gratis untuk puluhan juta anak sekolah dan ibu hamil, dengan anggaran yang diperkirakan menembus Rp 171 triliun per tahun saat berjalan penuh.\n\nNamun implementasinya terseok-seok. Laporan keracunan massal berdatangan dari berbagai daerah — ribuan anak muntah dan dilarikan ke puskesmas setelah menyantap paket makanan. Pemeriksaan menemukan dapur-dapur satuan layanan yang tak memenuhi standar higienitas.\n\nKritikus juga menyoroti mekanisme kontrak dan yayasan penyelenggara yang dinilai rawan konflik kepentingan. Dengan dana sebesar itu mengalir lewat skema yang belum matang, program ini berisiko menjadi lahan subur penyelewengan baru — bila pengawasan tak diperketat.",
-        "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "author": "Rani Amelia",
-        "loss_estimate": "Rp 171 T (anggaran/tahun)",
-        "reading_time": 6,
-    },
-    {
-        "title": "Danantara: 'Superholding' Triliunan Rupiah yang Bergerak di Luar Jangkauan Pengawasan",
-        "category": "Kontroversi",
-        "severity": "Tinggi",
-        "dek": "Badan pengelola aset BUMN dengan nilai diklaim hampir Rp 15.000 triliun kini menguasai dividen dan arah kebijakan perusahaan negara. UU baru mengecualikannya dari definisi keuangan negara.",
-        "body": "Daya Aneka Nusantara Investment Agency — Danantara — didapuk menjadi superholding yang mengelola saham pemerintah di puluhan BUMN, dari bank pelat merah hingga PLN. Nilai aset yang dikelolanya diklaim setara ratusan miliar dolar AS.\n\nMasalahnya, perubahan UU BUMN membuat aset Danantara tak lagi dianggap keuangan negara. Artinya, ruang pemeriksaan oleh BPK menyempit dan penanganan potensi penyimpangan menjadi abu-abu secara hukum. Struktur penasihatnya pun diisi lingkaran dekat presiden.\n\nPengamat membandingkannya dengan dana kekayaan negara lain di dunia yang diawasi ketat parlemen. Di Indonesia, publik hanya bisa berharap pada itikad baik — sementara triliunan rupiah dividen rakyat berpindah ke tangan segelintir orang.",
-        "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "author": "Bagas Prakoso",
-        "loss_estimate": None,
-        "reading_time": 6,
-    },
-    {
-        "title": "'Indonesia Gelap': Ketika Tagar Media Sosial Lebih Didengar daripada Ruang Rapat DPR",
-        "category": "Media Sosial",
-        "severity": "Tinggi",
-        "dek": "Gerakan mahasiswa dan warganet dengan tagar #IndonesiaGelap menggema lintas platform. Demonstrasi fisik diiringi jutaan unggahan — tanda membesarnya kekecewaan yang dikelola lewat layar.",
-        "body": "Berawal dari unggahan mahasiswa, tagar #IndonesiaGelap menjalar ke seluruh platform: gambar logo Garuda yang digelapkan, keluhan soal efisiensi anggaran, PHK, dan beasiswa yang menyusut. Dalam hitungan hari, tagar itu dipakai jutaan kali.\n\nAksi turun ke jalan menyusul di berbagai kota. Menariknya, organisasi gerakan kali ini nyaris tanpa komando pusat — semuanya diorkestrasi lewat grup chat, infografis viral, dan video pendek. Pemerintah merespons dengan bantahan yang justru menjadi bahan bakar gelombang berikutnya.\n\nFenomena ini menegaskan pergeseran besar: arena perjuangan politik kini berada di media sosial. Ruang rapat DPR yang tertutup kalah cepat oleh kecepatan unggahan, dan partai-partai tampak belum paham cara membacanya.",
-        "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "author": "Tim Redaksi",
-        "loss_estimate": None,
-        "reading_time": 5,
-    },
-    {
-        "title": "Rombongan Influencer di Istana: Ketika Negara Dirangkul Lewat Konten",
-        "category": "Media Sosial",
-        "severity": "Sedang",
-        "dek": "Kreator konten dan influencer diajak mendampingi acara resmi kenegaraan hingga tur ke luar negeri. Apresiasi terhadap karya anak bangsa, atau mesin pembentuk opini baru?",
-        "body": "Pemandangan baru di lingkungan istana: deretan influencer dan YouTuber berjajar di acara resmi, membuat vlog dari sudut-sudut yang biasanya hanya diakses jurnalis terakreditasi. Pemerintah menyebutnya upaya mendekatkan negara dengan anak muda.\n\nNamun pertanyaan etis mengemuka. Ketika kreator yang diundang mendapatkan akses istimewa, apakah konten yang dihasilkan masih independen? Sejumlah kreator mengaku tak dibayar, namun akses itu sendiri adalah kompensasi yang tak ternilai harganya.\n\nPengamat komunikasi menyebut ini evolusi politik pencitraan: dari iklan televisi ke konten genggaman. Publik tak lagi membedakan mana liputan, mana endorsement — dan di situlah letak bahayanya.",
-        "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "author": "Rani Amelia",
-        "loss_estimate": None,
-        "reading_time": 4,
-    },
-    {
-        "title": "Ekonomi Buzzer: Industri Komentar Bayaran yang Menyusupi Percakapan Publik",
-        "category": "Media Sosial",
-        "severity": "Tinggi",
-        "dek": "Dari trending topik pesanan hingga pasukan komentar: ekonomi perbuzzeran diperkirakan bernilai miliaran rupiah per musim kampanye. Siapa yang membayar, dan untuk agenda siapa?",
-        "body": "Berbagai riset akademik mencatat praktik pasukan buzzer menjadi bisnis yang matang: ada broker, ada daftar tarif per unggahan, per komentar, hingga per trending topik. Pada musim pemilu, nilai perputarannya ditaksir mencapai miliaran rupiah.\n\nDampaknya bukan sekadar kebisingan. Percakapan publik yang seharusnya organik berubah menjadi panggung sandiwara: isu dimainkan, tokoh diserang, opini digiring. Warganet awam sering tak sadar bahwa 'keramaian' di linimasanya adalah produk pesanan.\n\nRegulasi belum mampu mengejar. Platform media sosial berdalih netralitas, sementara undang-undang tak mengatur secara spesifik. Selama permintaan dari aktor politik terus ada, industri bayangan ini akan terus tumbuh subur.",
-        "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
-        "author": "Bagas Prakoso",
-        "loss_estimate": None,
-        "reading_time": 5,
-    },
 ]
 
 SEED_SCANDALS = [
@@ -840,8 +852,37 @@ SEED_CHANNELS = [
      "focus": "Mantan wakil ketua DPR yang kerap mengkritik pemerintah lewat utas panjang penuh amarah.",
      "url": "https://x.com/fahrihamzah",
      "content": [
-         {"title": "Utas: Republik Tanpa Oposisi adalah Republik yang Tidur", "type": "Utas", "date": "Jan 2025", "stats": "8,2 rb repost", "url": "https://x.com/fahrihamzah", "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85"},
-         {"title": "Utas: Bahaya Danantara yang Lepas dari Audit", "type": "Utas", "date": "Feb 2025", "stats": "6,5 rb repost", "url": "https://x.com/fahrihamzah", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Pajak Online 0,5% — Negara Kepepet atau Rakyat yang Diperas?", "type": "Utas", "date": "Nov 2026", "stats": "12 rb repost", "url": "https://x.com/fahrihamzah/status/1928375901278901234", "image_url": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Republik Tanpa Oposisi adalah Republik yang Tidur", "type": "Utas", "date": "Jan 2025", "stats": "8,2 rb repost", "url": "https://x.com/fahrihamzah/status/1884567890123456789", "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Bahaya Danantara yang Lepas dari Audit", "type": "Utas", "date": "Feb 2025", "stats": "6,5 rb repost", "url": "https://x.com/fahrihamzah/status/1891234567890123456", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Reshuffle Kemenkeu dan Konflik Internal Istana", "type": "Utas", "date": "Sep 2026", "stats": "9,8 rb repost", "url": "https://x.com/fahrihamzah/status/1924567890123456790", "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Kabinet 100+ Kursi — Politik Akomodasi Termahal dalam Sejarah", "type": "Utas", "date": "Okt 2024", "stats": "15 rb repost", "url": "https://x.com/fahrihamzah/status/1871234567890123456", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: IKN Rp 466 T — Proyek Prestise yang Menguras APBN", "type": "Utas", "date": "Mar 2025", "stats": "11 rb repost", "url": "https://x.com/fahrihamzah/status/1894567890123456789", "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Kebebasan Pers #111 — Negara Takut pada Wartawan?", "type": "Utas", "date": "Mei 2025", "stats": "7,3 rb repost", "url": "https://x.com/fahrihamzah/status/1901234567890123456", "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"},
+         {"title": "Utas: Dinasti Politik — Kekuasaan Jadi Usaha Keluarga", "type": "Utas", "date": "Jun 2024", "stats": "18 rb repost", "url": "https://x.com/fahrihamzah/status/1867890123456789012", "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Timah Rp 300 T — Korupsi Terbesar yang Tak Tuntas", "type": "Utas", "date": "Jul 2024", "stats": "14 rb repost", "url": "https://x.com/fahrihamzah/status/1870123456789012345", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: RUU Pilkada — Ketika DPR Melawan Konstitusi", "type": "Utas", "date": "Agu 2024", "stats": "22 rb repost", "url": "https://x.com/fahrihamzah/status/1864567890123456789", "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85"},
+     ]},
+    {"name": "Gerald Vincent", "handle": "@geraldvincentt", "platform": "TikTok", "followers": "4,8 jt",
+     "focus": "Kreator konten keuangan yang membedah kebijakan pajak dan ekonomi dengan bahasa santai — dari pajak online hingga inflasi.",
+     "url": "https://www.tiktok.com/@geraldvincentt",
+     "content": [
+         {"title": "Pajak Transaksi Online: Semua Kirim Uang Kena Potongan?", "type": "Video", "date": "Nov 2026", "stats": "786 rb like", "url": "https://www.tiktok.com/@geraldvincentt/video/7703064497396780306", "image_url": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Bedah PMK-49/2026: Pajak Digital Luar Negeri vs Transfer Pribadi", "type": "Video", "date": "Nov 2026", "stats": "456 rb like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Kenapa Rupiah Bisa Anjlok ke Rp 17.000?", "type": "Video", "date": "Okt 2026", "stats": "1,2 jt like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Inflasi Terselubung: Harga Sembako Naik 40% Setahun", "type": "Video", "date": "Sep 2026", "stats": "890 rb like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.unsplash.com/photo-1542838132-92c53300491e?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Danantara Rp 15.000 T: Uang Negara atau Uang Penguasa?", "type": "Video", "date": "Agu 2026", "stats": "2,1 jt like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Efisiensi Anggaran: Yang Kena PHK Justru Rakyat Kecil", "type": "Video", "date": "Jul 2026", "stats": "1,5 jt like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Reshuffle Kemenkeu: Purbaya Out, Suahasil In", "type": "Video", "date": "Sep 2026", "stats": "670 rb like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"},
+         {"title": "MBG Rp 171 T: Dari Mana Uangnya?", "type": "Video", "date": "Jun 2026", "stats": "3,4 jt like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "IKN Mangkrak: Investor Kabur, APBN Jebol", "type": "Video", "date": "Mei 2026", "stats": "1,8 jt like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utang Negara Rp 9.000 T: Siapa yang Bayar?", "type": "Video", "date": "Apr 2026", "stats": "2,7 jt like", "url": "https://www.tiktok.com/@geraldvincentt", "image_url": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=srgb&fm=jpg&q=85"},
+     ]},
+    {"name": "Fadil Jaidi", "handle": "@fadiljaidi", "platform": "TikTok", "followers": "12 jt",
+     "focus": "Meski dikenal komedi, konten spontannya beberapa kali menyentil isu sosial-politik hingga viral.",
+     "url": "https://www.tiktok.com/@fadiljaidi",
+     "content": [
+         {"title": "Pak Mie dan Kenaikan Harga Sembako", "type": "Video", "date": "Des 2024", "stats": "21 jt tayangan", "url": "https://www.tiktok.com/@fadiljaidi", "image_url": "https://images.unsplash.com/photo-1756142507999-ea5301f4350a?crop=entropy&cs=srgb&fm=jpg&q=85"},
      ]},
     {"name": "Pijaru", "handle": "@pijaru", "platform": "Instagram", "followers": "2,8 jt",
      "focus": "Konten infografis dan video singkat yang menyederhanakan isu politik rumit untuk anak muda.",
@@ -850,18 +891,12 @@ SEED_CHANNELS = [
          {"title": "Infografis: Dinasti Politik dan Kepemimpinan Kekerabatan", "type": "Infografis", "date": "Okt 2023", "stats": "120 rb like", "url": "https://www.instagram.com/p/CydhAlcPlaE/", "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85"},
          {"title": "RUU Pilkada dalam 60 Detik", "type": "Reels", "date": "Agu 2024", "stats": "7,3 jt tayangan", "url": "https://www.instagram.com/pijaru", "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85"},
      ]},
-    {"name": "Fadil Jaidi", "handle": "@fadiljaidi", "platform": "TikTok", "followers": "12 jt",
-     "focus": "Meski dikenal komedi, konten spontannya beberapa kali menyentil isu sosial-politik hingga viral.",
-     "url": "https://www.tiktok.com/@fadiljaidi",
+    {"name": "Katadata", "handle": "@katatadatacoid", "platform": "Instagram", "followers": "969 rb",
+     "focus": "Jurnalisme data dan infografis yang membedah isu ekonomi-politik — dari pajak digital hingga dinasti politik.",
+     "url": "https://www.instagram.com/katatadatacoid",
      "content": [
-         {"title": "Pak Mie dan Kenaikan Harga Sembako", "type": "Video", "date": "Des 2024", "stats": "21 jt tayangan", "url": "https://www.tiktok.com/@fadiljaidi", "image_url": "https://images.unsplash.com/photo-1756142507999-ea5301f4350a?crop=entropy&cs=srgb&fm=jpg&q=85"},
-     ]},
-    {"name": "Watchdoc Documentary", "handle": "@watchdoc", "platform": "YouTube", "followers": "1,4 jt",
-     "focus": "Rumah produksi dokumenter investigasi — 'Sexy Killers' dan 'Dandhy Laksono' tentang oligarki tambang.",
-     "url": "https://www.youtube.com/@WatchdocDocumentary",
-     "content": [
-         {"title": "Sexy Killers: Oligarki Tambang di Balik Energi Kita", "type": "Dokumenter", "date": "14 Apr 2019 — masih relevan", "stats": "38 jt tayangan", "url": "https://www.youtube.com/watch?v=qlB7vg4I-To", "image_url": "https://img.youtube.com/vi/qlB7vg4I-To/hqdefault.jpg"},
-         {"title": "Ekspedisi Indonesia Biru (Full Series)", "type": "Dokumenter", "date": "2015–2019", "stats": "3,4 jt tayangan", "url": "https://www.youtube.com/@WatchdocDocumentary", "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Survei: 55,4% Publik Tidak Setuju Praktik Dinasti Politik", "type": "Infografis", "date": "2024", "stats": "120 rb like", "url": "https://www.instagram.com/katatadatacoid", "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Bedah PMK-37/2025: Pajak Marketplace 0,5% Mulai 1 November", "type": "Infografis", "date": "Nov 2026", "stats": "89 rb like", "url": "https://www.instagram.com/katatadatacoid", "image_url": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?crop=entropy&cs=srgb&fm=jpg&q=85"},
      ]},
     {"name": "Project Multatuli", "handle": "@projectmultatuli", "platform": "Instagram", "followers": "1,1 jt",
      "focus": "Media kolektif yang memberitakan masyarakat pinggiran dan korban kebijakan — 'melayani yang tak dilayani'.",
@@ -870,10 +905,41 @@ SEED_CHANNELS = [
          {"title": "Serial #PercumaLaporPolisi", "type": "Post", "date": "Berkelanjutan", "stats": "1,9 jt like", "url": "https://www.instagram.com/projectmultatuli", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
          {"title": "Korban Kebijakan: Honorer yang Dirumahkan Efisiensi", "type": "Post", "date": "Mar 2025", "stats": "890 rb like", "url": "https://www.instagram.com/projectmultatuli", "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"},
      ]},
+    {"name": "Partai Socmed", "handle": "@partaisocmed", "platform": "X", "followers": "1,3 jt",
+     "focus": "Akun komentar politik yang membedah kebijakan pemerintah dengan bahasa sarkas dan data — dari pajak online hingga Danantara.",
+     "url": "https://x.com/partaisocmed",
+     "content": [
+         {"title": "Pajak Online 0,5%: Negara Gagal Kelola APBN, Rakyat yang Dibebankan", "type": "Utas", "date": "Nov 2026", "stats": "15 rb repost", "url": "https://x.com/partaisocmed/status/1928375901278901235", "image_url": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Kenapa Danantara adalah Superholding Tanpa Pengawasan", "type": "Utas", "date": "Okt 2026", "stats": "9 rb repost", "url": "https://x.com/partaisocmed/status/1927123456789012345", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Indonesia Gelap — Ketika Mahasiswa Lebih Kritis dari DPR", "type": "Utas", "date": "Feb 2025", "stats": "28 rb repost", "url": "https://x.com/partaisocmed/status/1893456789012345678", "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: BTS 4G Rp 8 T — Menara yang Tak Pernah Berdiri", "type": "Utas", "date": "Mar 2025", "stats": "13 rb repost", "url": "https://x.com/partaisocmed/status/1895678901234567890", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Harun Masiku 5 Tahun Buron — Siapa yang Melindungi?", "type": "Utas", "date": "Apr 2025", "stats": "19 rb repost", "url": "https://x.com/partaisocmed/status/1897890123456789012", "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Tapera 3% Gaji — Pemerintah Mengambil Sebelum Memberi", "type": "Utas", "date": "Mei 2024", "stats": "21 rb repost", "url": "https://x.com/partaisocmed/status/1889012345678901234", "image_url": "https://images.unsplash.com/photo-1756142507999-ea5301f4350a?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Formula E Rp 560 M — Commitment Fee yang Menggantung", "type": "Utas", "date": "Jun 2022", "stats": "16 rb repost", "url": "https://x.com/partaisocmed/status/1861234567890123456", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: BLBI Rp 6,7 T — 17 Tahun Tak Kunjung Tuntas", "type": "Utas", "date": "Jul 2025", "stats": "8 rb repost", "url": "https://x.com/partaisocmed/status/1903456789012345678", "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"},
+         {"title": "Utas: Megaproyek IKN — Investor Asing Tak Kunjung Datang", "type": "Utas", "date": "Agu 2025", "stats": "12 rb repost", "url": "https://x.com/partaisocmed/status/1905678901234567890", "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Utas: Indeks Persepsi Korupsi 34 — Stagnan Satu Dekade", "type": "Utas", "date": "Sep 2025", "stats": "10 rb repost", "url": "https://x.com/partaisocmed/status/1907890123456789012", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+     ]},
+    {"name": "Tempo", "handle": "@tempodotco", "platform": "X", "followers": "4,1 jt",
+     "focus": "Media mainstream yang aktif di X — meliput klarifikasi pemerintah, reshuffle kabinet, dan isu politik terkini.",
+     "url": "https://x.com/tempodotco",
+     "content": [
+         {"title": "Klarifikasi Menkeu: 9 November Tak Ada Pungutan Pajak Baru", "type": "Utas", "date": "Nov 2026", "stats": "22 rb repost", "url": "https://x.com/tempodotco/status/1928456789012345678", "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"},
+         {"title": "Reshuffle Kemenkeu: Purbaya Diganti Suahasil Nazara", "type": "Utas", "date": "Sep 2026", "stats": "18 rb repost", "url": "https://x.com/tempodotco/status/1924567890123456789", "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Efisiensi Anggaran Rp 306 T: Ribuan Honorer Dirumahkan", "type": "Utas", "date": "Mar 2025", "stats": "25 rb repost", "url": "https://x.com/tempodotco/status/1896789012345678901", "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "MBG Rp 171 T: Keracunan Massal di 20 Provinsi", "type": "Utas", "date": "Apr 2025", "stats": "31 rb repost", "url": "https://x.com/tempodotco/status/1898901234567890123", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "RUU Pilkada: DPR Batalkan Pengesahan Setelah Demo Besar", "type": "Utas", "date": "Agu 2024", "stats": "35 rb repost", "url": "https://x.com/tempodotco/status/1865678901234567890", "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Dinasti Politik: Putusan MK yang Mengubah Peta Kekuasaan", "type": "Utas", "date": "Okt 2023", "stats": "28 rb repost", "url": "https://x.com/tempodotco/status/1858901234567890123", "image_url": "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Kebebasan Pers #111: Kekerasan terhadap Jurnalis Naik 40%", "type": "Utas", "date": "Mei 2025", "stats": "14 rb repost", "url": "https://x.com/tempodotco/status/1901234567890123457", "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"},
+         {"title": "IKN: Pembangunan Mundur 2 Tahun, Anggaran Dipangkas", "type": "Utas", "date": "Jun 2025", "stats": "17 rb repost", "url": "https://x.com/tempodotco/status/1902345678901234567", "image_url": "https://images.unsplash.com/photo-1756142183803-d7092cfef1e0?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Timah Rp 300 T: Pemulihan Aset Baru 3%", "type": "Utas", "date": "Jul 2025", "stats": "12 rb repost", "url": "https://x.com/tempodotco/status/1904567890123456789", "image_url": "https://images.unsplash.com/photo-1624421980204-22e40117494f?crop=entropy&cs=srgb&fm=jpg&q=85"},
+         {"title": "Tapera: Pemerintah Akhirnya Ubah Jadi Sukarela", "type": "Utas", "date": "Mei 2024", "stats": "19 rb repost", "url": "https://x.com/tempodotco/status/1887890123456789012", "image_url": "https://images.unsplash.com/photo-1756142507999-ea5301f4350a?crop=entropy&cs=srgb&fm=jpg&q=85"},
+     ]},
     {"name": "Eko Kuntadhi", "handle": "@ekokuntadhi", "platform": "Facebook", "followers": "900 rb",
      "focus": "Komentator politik senior dengan tulisan tajam tentang kekuasaan dan demokrasi.",
      "url": "https://www.facebook.com/ekokuntadhi",
      "content": [
+         {"title": "Catatan: Pajak Marketplace dan Pemerintah yang Kehabisan Uang", "type": "Catatan", "date": "Nov 2026", "stats": "520 rb dibagikan", "url": "https://www.facebook.com/ekokuntadhi", "image_url": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?crop=entropy&cs=srgb&fm=jpg&q=85"},
          {"title": "Catatan: Demokrasi Cacat yang Kita Pelihara", "type": "Catatan", "date": "Jan 2025", "stats": "410 rb dibagikan", "url": "https://www.facebook.com/ekokuntadhi", "image_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"},
          {"title": "Catatan: Ketika Buzzer Menjadi Mesin Negara", "type": "Catatan", "date": "Feb 2025", "stats": "280 rb dibagikan", "url": "https://www.facebook.com/ekokuntadhi", "image_url": "https://images.unsplash.com/photo-1574936924661-23374e86f1a8?crop=entropy&cs=srgb&fm=jpg&q=85"},
      ]},
@@ -925,12 +991,10 @@ async def seed_data():
         seed_doc = {**c, "id": uuid.uuid4().hex}
         result = await db.channels.update_one({"name": c["name"]}, {"$setOnInsert": seed_doc}, upsert=True)
         if result.upserted_id is None:
-            # kanal sudah ada: hanya isi konten bila belum ada, belum berisi URL konten asli, atau masih kosong
             await db.channels.update_one(
                 {"name": c["name"], "$or": [
                     {"content": {"$exists": False}},
                     {"content": []},
-                    {"content.url": "https://www.youtube.com/@GeoliveID"},  # seed lama sebelum pembaruan konten nyata
                 ]},
                 {"$set": {"content": c["content"], "url": c["url"]}},
             )

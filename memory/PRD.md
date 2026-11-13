@@ -65,6 +65,16 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 - Konten trending bad news politics: 10 item per kanal untuk Gerald Vincent (TikTok), Fahri Hamzah (X), Partai Socmed (X), Tempo (X) — total 40 konten trending November 2026 (pajak online 0,5%, reshuffle Kemenkeu, efisiensi anggaran, MBG, IKN, dinasti politik, Timah, RUU Pilkada, dll).
 - Thumbnail diperbaiki: semua memakai URL stabil Unsplash/Pexels; TikTok menampilkan embed video asli, X menampilkan preview thumbnail kaya dengan branding.
 
+## Implemented (2026-11-06, ronde 12)
+- Scraper berita otomatis: RSS feed dari Kompas, Detik, Tempo, CNN Indonesia, dan Tribun dipindai setiap 6 jam (cron 0 */6 * * * Asia/Jakarta) untuk keyword politik (korupsi, skandal, Prabowo, Gibran, DPR, KPK, pajak, anggaran, demonstrasi, kontroversi, reshuffle, Danantara, IKN, MBG, kebebasan pers, dinasti politik).
+- Artikel yang cocok otomatis masuk database dengan kategori Politik, severity Sedang, penulis nama portal, dan link sumber asli. Duplikat dicek via source_url.
+- Endpoint POST /api/cron/scrape-news (protected WEBHOOK_CRON_SECRET) langsung ack 2xx dan enqueue scraping di background.
+- Cron config: .emergent/crons.yml dengan timezone Asia/Jakarta.
+
+## Verified (ronde 12)
+- curl POST /api/cron/scrape-news → queued, total articles naik dari 15 ke 33 (18 artikel baru terscrape dari portal berita).
+- Contoh artikel terscrape: "Jejak Gibran, dari Bisnis Martabak hingga Kursi Wapres" (Kompas).
+
 ## Verified (ronde 11) — oleh troubleshoot_agent
 - TikTok: Gerald Vincent dengan 10 konten + embed video berfungsi. X: Fahri Hamzah, Partai Socmed, Tempo masing-masing 10 konten dengan preview thumbnail benar. Semua thumbnail termuat, konten trending November 2026 tersedia.
 
