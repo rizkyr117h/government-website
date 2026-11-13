@@ -412,7 +412,9 @@ async def scrape_news():
             for entry in feed.entries[:20]:
                 title = entry.get("title", "")
                 link = entry.get("link", "")
-                summary = entry.get("summary", "")[:300]
+                summary = entry.get("summary", "")
+                # Strip HTML tags dari summary RSS (biar tidak tampil sebagai teks literal di frontend)
+                summary = re.sub(r"<[^>]+>", "", summary).strip()[:300]
                 published = entry.get("published_parsed")
                 if not title or not link:
                     continue
@@ -445,15 +447,15 @@ async def scrape_news():
                         if l.get("type", "").startswith("image"):
                             image_url = l.get("href", "")
                             break
-                # Upgrade thumbnail ke resolusi tinggi (hilangkan parameter kualitas rendah)
-                if image_url:
+                # CDN Detik (akcdn.detik.net.id) melayani resolusi sesuai param ?w= — paksa resolusi besar
+                if image_url and "akcdn.detik.net.id" in image_url:
+                    image_url = re.sub(r"\?.*$", "", image_url)
+                    image_url += "?w=1200&q=90"
+                # Portal lain: bersihkan parameter kualitas rendah
+                elif image_url:
                     image_url = re.sub(r"\?w=\d+&q=\d+$", "", image_url)
                     image_url = re.sub(r"\?w=\d+$", "", image_url)
-                    image_url = re.sub(r"_\d+x\d+\.jpg", ".jpg", image_url)
                     image_url = re.sub(r"_small\.jpg", ".jpg", image_url)
-                    image_url = re.sub(r"_169\.jpeg", ".jpeg", image_url)
-                    image_url = re.sub(r"_169\.png", ".png", image_url)
-                    image_url = re.sub(r"_169\.", "_640.", image_url)
                 # Fallback: jika gambar kosong, ambil dari halaman artikel langsung
                 if not image_url:
                     try:
