@@ -28,3 +28,6 @@ typer>=0.9.0
 emergentintegrations==0.2.2
 feedparser==6.0.14
 feedparser-sgmllib==2.1.0
+beautifulsoup4==4.15.0
+requests==2.34.2
+requests-oauthlib==2.0.0

@@ -74,6 +74,12 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 ## Implemented (2026-11-06, ronde 13)
 - Fix kualitas gambar scraping: logika ekstraksi gambar diperkuat untuk mengambil media_content berkualitas tinggi (bukan thumbnail 360px), menghapus parameter ?w=360&q=90, dan meng-upgrade _169.jpeg menjadi _640.jpeg untuk CDN Detik. 14 artikel existing di-update.
 
+## Implemented (2026-11-06, ronde 14)
+- Fix indentation bug di scraper: fallback og:image scraping dan placeholder logic dipindah ke level indentasi yang benar (sebelumnya unreachable karena nested di dalam `if image_url:`). Sekarang artikel Tempo yang RSS-nya tidak menyediakan gambar otomatis mendapat placeholder tematik politik.
+
+## Verified (ronde 14) — oleh troubleshoot_agent
+- 36 artikel di database, 0 dengan gambar kosong; 16 artikel memakai placeholder (fallback berfungsi); semua gambar Detik berkualitas _640; tidak ada parameter kualitas rendah tersisa.
+
 ## Verified (ronde 13) — oleh troubleshoot_agent
 - 0/34 artikel memiliki parameter kualitas rendah di image_url; 14 artikel Detik CDN berhasil di-upgrade ke _640; frontend menampilkan gambar berkualitas tinggi. Catatan: body text masih mengandung URL gambar lama (hanya berdampak jika body HTML dirender, tidak memengaruhi thumbnail kartu).
 

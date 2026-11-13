@@ -447,18 +447,28 @@ async def scrape_news():
                             break
                 # Upgrade thumbnail ke resolusi tinggi (hilangkan parameter kualitas rendah)
                 if image_url:
-                    # Detik/Tempo/CNN: hilangkan ?w=360&q=90, ubah _169.jpeg jadi .jpeg
                     image_url = re.sub(r"\?w=\d+&q=\d+$", "", image_url)
                     image_url = re.sub(r"\?w=\d+$", "", image_url)
                     image_url = re.sub(r"_\d+x\d+\.jpg", ".jpg", image_url)
                     image_url = re.sub(r"_small\.jpg", ".jpg", image_url)
                     image_url = re.sub(r"_169\.jpeg", ".jpeg", image_url)
                     image_url = re.sub(r"_169\.png", ".png", image_url)
-                    # Jika masih ada _169 di tengah, ganti dengan resolusi lebih besar
                     image_url = re.sub(r"_169\.", "_640.", image_url)
-                    # Detik CDN: coba ambil versi besar dengan mengganti pattern
-                    if "akcdn.detik.net.id" in image_url and "_169" in image_url:
-                        image_url = image_url.replace("_169.", "_640.")
+                # Fallback: jika gambar kosong, ambil dari halaman artikel langsung
+                if not image_url:
+                    try:
+                        import requests
+                        from bs4 import BeautifulSoup
+                        r = requests.get(link, timeout=5, headers={"User-Agent": "Mozilla/5.0"})
+                        soup = BeautifulSoup(r.text, "html.parser")
+                        og_img = soup.find("meta", property="og:image")
+                        if og_img:
+                            image_url = og_img.get("content", "")
+                    except Exception:
+                        pass
+                # Fallback terakhir: placeholder tematik politik Indonesia
+                if not image_url:
+                    image_url = "https://images.unsplash.com/photo-1569996958517-3b0e816ac40c?crop=entropy&cs=srgb&fm=jpg&q=85"
                 doc = {
                     "id": uuid.uuid4().hex,
                     "slug": slugify(title),
