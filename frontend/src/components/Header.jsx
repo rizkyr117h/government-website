@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Search, ShieldCheck } from "lucide-react";
+import { Search } from "lucide-react";
 import EditorialMarquee from "@/components/EditorialMarquee";
 
 export const LogoMark = ({ className = "w-10 h-10" }) => (
@@ -74,14 +74,6 @@ export default function Header() {
           >
             <Search size={17} />
           </a>
-          <Link
-            to="/admin"
-            data-testid="header-admin-link"
-            className="flex h-10 items-center gap-2 border border-slate-900 bg-slate-900 px-3 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-red-700 hover:border-red-700"
-          >
-            <ShieldCheck size={15} />
-            <span className="hidden sm:inline">Redaksi</span>
-          </Link>
         </div>
       </div>
       <EditorialMarquee />

@@ -80,6 +80,12 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 ## Implemented (2026-11-06, ronde 15)
 - Fix gambar burem scraping: akar masalah — CDN Detik (akcdn.detik.net.id) melayani resolusi sesuai parameter ?w=; _169.jpeg tanpa param = 200px (burem), _169.jpeg?w=1200&q=90 = 1200px (tajam). Scraper kini menambahkan ?w=1200&q=90 untuk semua URL Detik; 16 artikel existing di-upgrade. Juga fix: HTML tags di summary RSS di-strip sebelum disimpan (dek/body bersih).
 
+## Implemented (2026-11-06, ronde 16)
+- Autentikasi disembunyikan dari tampilan publik: tombol "Redaksi" di header dan "Portal Redaksi" di footer dihapus. Pengunjung membaca semua konten tanpa login (memang sejak awal tidak ada login wall). Halaman /masuk tetap ada tapi tersembunyi — hanya pemilik yang tahu, untuk mengelola konten. Login admin & endpoint terproteksi tetap aktif di backend (mencegah sembarang orang menghapus artikel).
+
+## Verified (ronde 16)
+- Screenshots: header & footer publik bersih tanpa tombol login; /masuk → login admin masih berfungsi dan dasbor tampil.
+
 ## Verified (ronde 15) — oleh troubleshoot_agent
 - Semua 16 gambar Detik kini ?w=1200&q=90; artikel Gibran martabak yang disebut user: 1200x675px tajam; 0 HTML tags di dek/body; screenshot feed menampilkan gambar tajam.
 

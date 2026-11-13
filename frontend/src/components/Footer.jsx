@@ -39,13 +39,6 @@ export default function Footer() {
           <p className="mt-4 text-sm leading-relaxed text-slate-600">
             Punya bocoran dokumen atau informasi publik? Kirim ke redaksi. Identitas pelapor dijamin kerahasiaannya.
           </p>
-          <Link
-            to="/admin"
-            data-testid="footer-admin-link"
-            className="mt-4 inline-block border border-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-900 transition-colors hover:bg-slate-900 hover:text-white"
-          >
-            Portal Redaksi
-          </Link>
         </div>
       </div>
       <div className="border-t border-slate-300 py-4 text-center text-[11px] font-mono uppercase tracking-wider text-slate-500">
