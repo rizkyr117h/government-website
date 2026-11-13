@@ -71,6 +71,12 @@ User choices: portal berita skandal/kontroversi politik Indonesia + arsip/tracke
 - Endpoint POST /api/cron/scrape-news (protected WEBHOOK_CRON_SECRET) langsung ack 2xx dan enqueue scraping di background.
 - Cron config: .emergent/crons.yml dengan timezone Asia/Jakarta.
 
+## Implemented (2026-11-06, ronde 13)
+- Fix kualitas gambar scraping: logika ekstraksi gambar diperkuat untuk mengambil media_content berkualitas tinggi (bukan thumbnail 360px), menghapus parameter ?w=360&q=90, dan meng-upgrade _169.jpeg menjadi _640.jpeg untuk CDN Detik. 14 artikel existing di-update.
+
+## Verified (ronde 13) — oleh troubleshoot_agent
+- 0/34 artikel memiliki parameter kualitas rendah di image_url; 14 artikel Detik CDN berhasil di-upgrade ke _640; frontend menampilkan gambar berkualitas tinggi. Catatan: body text masih mengandung URL gambar lama (hanya berdampak jika body HTML dirender, tidak memengaruhi thumbnail kartu).
+
 ## Verified (ronde 12)
 - curl POST /api/cron/scrape-news → queued, total articles naik dari 15 ke 33 (18 artikel baru terscrape dari portal berita).
 - Contoh artikel terscrape: "Jejak Gibran, dari Bisnis Martabak hingga Kursi Wapres" (Kompas).

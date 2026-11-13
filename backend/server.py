@@ -429,15 +429,36 @@ async def scrape_news():
                     pub_date = datetime(*published[:6], tzinfo=timezone.utc).isoformat()
                 else:
                     pub_date = datetime.now(timezone.utc).isoformat()
-                # Ambil gambar OG kalau ada
+                # Ambil gambar berkualitas tinggi (bukan thumbnail kecil)
                 image_url = ""
+                # Coba ambil dari media:content (biasanya resolusi tinggi)
                 if "media_content" in entry and entry.media_content:
-                    image_url = entry.media_content[0].get("url", "")
+                    # Ambil yang terbesar
+                    media = max(entry.media_content, key=lambda m: m.get("width", 0))
+                    image_url = media.get("url", "")
+                # Fallback ke media:thumbnail
+                elif "media_thumbnail" in entry and entry.media_thumbnail:
+                    image_url = entry.media_thumbnail[0].get("url", "")
+                # Fallback ke enclosure/link image
                 elif "links" in entry:
                     for l in entry.links:
                         if l.get("type", "").startswith("image"):
                             image_url = l.get("href", "")
                             break
+                # Upgrade thumbnail ke resolusi tinggi (hilangkan parameter kualitas rendah)
+                if image_url:
+                    # Detik/Tempo/CNN: hilangkan ?w=360&q=90, ubah _169.jpeg jadi .jpeg
+                    image_url = re.sub(r"\?w=\d+&q=\d+$", "", image_url)
+                    image_url = re.sub(r"\?w=\d+$", "", image_url)
+                    image_url = re.sub(r"_\d+x\d+\.jpg", ".jpg", image_url)
+                    image_url = re.sub(r"_small\.jpg", ".jpg", image_url)
+                    image_url = re.sub(r"_169\.jpeg", ".jpeg", image_url)
+                    image_url = re.sub(r"_169\.png", ".png", image_url)
+                    # Jika masih ada _169 di tengah, ganti dengan resolusi lebih besar
+                    image_url = re.sub(r"_169\.", "_640.", image_url)
+                    # Detik CDN: coba ambil versi besar dengan mengganti pattern
+                    if "akcdn.detik.net.id" in image_url and "_169" in image_url:
+                        image_url = image_url.replace("_169.", "_640.")
                 doc = {
                     "id": uuid.uuid4().hex,
                     "slug": slugify(title),
